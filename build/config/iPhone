@@ -11,15 +11,6 @@
 #
 LINKMODE ?= STATIC
 
-#
-# If the SDK is defined use it
-# Otherwise find the latest version installed
-#
-# IPHONE_SDK_VERSION = 2.2.1
-
-# if IPHONE_SDK_VERSION_MIN is defined use that
-# Otherwise use the version found. 
-
 IPHONE_SDK             ?= iPhoneOS
 IPHONE_SDK_ROOT        ?= $(shell xcode-select -print-path)/Platforms/$(IPHONE_SDK).platform/Developer/SDKs
 IPHONE_SDK_ROOT_DIR     = $(IPHONE_SDK_ROOT)/$(IPHONE_SDK)
@@ -32,7 +23,8 @@ TOOL_PREFIX            ?= $(shell xcode-select -print-path)/Platforms/$(IPHONE_S
 ifneq ($(POCO_TARGET_OSARCH),arm64)
 THUMB = -mthumb
 endif
-OSFLAGS                ?= -arch $(POCO_TARGET_OSARCH) -isysroot $(IPHONE_SDK_BASE) $(THUMB) -miphoneos-version-min=$(IPHONE_SDK_VERSION_MIN) -fembed-bitcode
+APPLE_TARGET           ?= $(POCO_TARGET_OSARCH)-apple-ios11.4
+OSFLAGS                ?= -arch $(POCO_TARGET_OSARCH) -target $(APPLE_TARGET) -isysroot $(IPHONE_SDK_BASE) $(THUMB)
 
 #
 # Tools
@@ -88,9 +80,9 @@ RELEASEOPT_LINK =
 #
 # System Specific Flags
 #
-SYSFLAGS = -DPOCO_HAVE_IPv6 -DPOCO_SOCKETADDRESS_DONT_PREFER_IPV4 -DPOCO_NO_FPENVIRONMENT -DPOCO_NO_STAT64 -DPOCO_NO_SHAREDLIBS -DPOCO_NO_NET_IFTYPES
+SYSFLAGS = -DPOCO_HAVE_IPv6 -DPOCO_SOCKETADDRESS_DONT_PREFER_IPV4 -DPOCO_NO_FPENVIRONMENT -DPOCO_NO_STAT64 -DPOCO_NO_SHAREDLIBS -DPOCO_NO_NET_IFTYPES -I$(OPENSSL_DIR)/include
 
 #
 # System Specific Libraries
 #
-SYSLIBS  = -ldl
+SYSLIBS  = -L$(OPENSSL_DIR)/lib -ldl
