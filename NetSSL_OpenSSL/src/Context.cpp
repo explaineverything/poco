@@ -200,7 +200,14 @@ void Context::useCertificate(const Poco::Crypto::X509Certificate& certificate)
 void Context::addChainCertificate(const Poco::Crypto::X509Certificate& certificate)
 {
 	X509* pCert = certificate.dup();
-	int errCode = SSL_CTX_add_extra_chain_cert(_pSSLContext, pCert);
+
+	//Changed for port OpenSSL -> BoringSSL
+	#if defined(OPENSSL_IS_BORINGSSL)
+		int errCode = SSL_CTX_add_extra_chain_cert(_pSSLContext, pCert);
+	#else 
+		int errCode = SSL_CTX_add_extra_chain_cert(_pSSLContext, pCert);
+	#endif
+	
 	if (errCode != 1)
 	{
 		X509_free(pCert);
@@ -716,7 +723,17 @@ void Context::initDH(bool use2048Bits, const std::string& dhParamsFile)
 			std::string msg = Utility::getLastError();
 			throw SSLContextException("Error creating Diffie-Hellman parameters", msg);
 		}
-#if OPENSSL_VERSION_NUMBER >= 0x10100000L && !defined(LIBRESSL_VERSION_NUMBER)
+//Changed for port OpenSSL -> BoringSSL	
+#if defined(OPENSSL_IS_BORINGSSL)
+		dh->p = BN_bin2bn(dh1024_p, sizeof(dh1024_p), 0);
+		dh->g = BN_bin2bn(dh1024_g, sizeof(dh1024_g), 0);
+		if ((!dh->p) || (!dh->g))
+		{
+			DH_free(dh);
+			throw SSLContextException("Error creating Diffie-Hellman parameters");
+		}
+#else
+	#if OPENSSL_VERSION_NUMBER >= 0x10100000L && !defined(LIBRESSL_VERSION_NUMBER)
 		BIGNUM* p = nullptr;
 		BIGNUM* g = nullptr;
 		if (use2048Bits)
@@ -738,7 +755,7 @@ void Context::initDH(bool use2048Bits, const std::string& dhParamsFile)
 			DH_free(dh);
 			throw SSLContextException("Error creating Diffie-Hellman parameters");
 		}
-#else
+	#else
 		if (use2048Bits)
 		{
 			dh->p = BN_bin2bn(dh2048_p, sizeof(dh2048_p), 0);
@@ -756,6 +773,7 @@ void Context::initDH(bool use2048Bits, const std::string& dhParamsFile)
 			DH_free(dh);
 			throw SSLContextException("Error creating Diffie-Hellman parameters");
 		}
+	#endif
 #endif
 	}
 	SSL_CTX_set_tmp_dh(_pSSLContext, dh);
@@ -771,24 +789,24 @@ void Context::initDH(bool use2048Bits, const std::string& dhParamsFile)
 void Context::initECDH(const std::string& curve)
 {
 #ifndef OPENSSL_NO_ECDH
-#if OPENSSL_VERSION_NUMBER >= 0x1000200fL
- 	const std::string groups(curve.empty() ?
- #if   OPENSSL_VERSION_NUMBER >= 0x1010100fL
- 				   "X448:X25519:P-521:P-384:P-256"
- #elif OPENSSL_VERSION_NUMBER >= 0x1010000fL
- 	// while OpenSSL 1.1.0 didn't support Ed25519 (EdDSA using Curve25519),
- 	// it did support X25519 (ECDH using Curve25516).
- 				   "X25519:P-521:P-384:P-256"
- #else
- 				   "P-521:P-384:P-256"
- #endif
- 				   : curve);
- 	if (SSL_CTX_set1_curves_list(_pSSLContext, groups.c_str()) == 0)
- 	{
- 		throw SSLContextException("Cannot set ECDH groups", groups);
- 	}
- 	SSL_CTX_set_options(_pSSLContext, SSL_OP_SINGLE_ECDH_USE);
- #elif OPENSSL_VERSION_NUMBER >= 0x0090800fL
+// #if OPENSSL_VERSION_NUMBER >= 0x1000200fL
+//  	const std::string groups(curve.empty() ?
+//  #if   OPENSSL_VERSION_NUMBER >= 0x1010100fL
+//  				   "X448:X25519:P-521:P-384:P-256"
+//  #elif OPENSSL_VERSION_NUMBER >= 0x1010000fL
+//  	// while OpenSSL 1.1.0 didn't support Ed25519 (EdDSA using Curve25519),
+//  	// it did support X25519 (ECDH using Curve25516).
+//  				   "X25519:P-521:P-384:P-256"
+//  #else
+//  				   "P-521:P-384:P-256"
+//  #endif
+//  				   : curve);
+//  	if (SSL_CTX_set1_curves_list(_pSSLContext, groups.c_str()) == 0)
+//  	{
+//  		throw SSLContextException("Cannot set ECDH groups", groups);
+//  	}
+//  	SSL_CTX_set_options(_pSSLContext, SSL_OP_SINGLE_ECDH_USE);
+//  #elif OPENSSL_VERSION_NUMBER >= 0x0090800fL
 	int nid = 0;
 	if (!curve.empty())
 	{
@@ -811,7 +829,7 @@ void Context::initECDH(const std::string& curve)
 	SSL_CTX_set_tmp_ecdh(_pSSLContext, ecdh);
 	SSL_CTX_set_options(_pSSLContext, SSL_OP_SINGLE_ECDH_USE);
 	EC_KEY_free(ecdh);
-#endif
+// #endif
 #endif
 }
 
