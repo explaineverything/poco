@@ -2,6 +2,8 @@ OPENSSL_DIR = /Users/kurak/Developer/ee/everything-webrtc/Libs/MCIE2Dependencies
 
 POCO_TARGET_OSNAME = ios
 POCO_TARGET_OSARCH = arm64
-APPLE_TARGET = $(POCO_TARGET_OSARCH)-apple-ios11.4
+
+
+APPLE_TARGET       = $(POCO_TARGET_OSARCH)-apple-ios11.4
 
 include $(POCO_BASE)/build/config/iPhone
