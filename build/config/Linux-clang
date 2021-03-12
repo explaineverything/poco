@@ -67,3 +67,9 @@ SYSFLAGS = -D_XOPEN_SOURCE=500 -D_REENTRANT -D_THREAD_SAFE -D_FILE_OFFSET_BITS=6
 # System Specific Libraries
 #
 SYSLIBS  = -lpthread -ldl -lrt
+
+# Added by Explain Everything
+CXXFLAGS += -std=c++14 -stdlib=libc++
+OPENSSL_DIR = /home/dev/dev/webrtc/include/src
+SYSFLAGS += -I$(OPENSSL_DIR)/include
+SYSLIBS  += -L/home/dev/dev/webrtc/lib
