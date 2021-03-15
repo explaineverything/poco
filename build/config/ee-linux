@@ -1,0 +1,7 @@
+include $(POCO_BASE)/build/config/ee-openssl
+include $(POCO_BASE)/build/config/Linux-clang
+
+CXXFLAGS 	+= -std=c++14 -stdlib=libc++
+LINKFLAGS  	+= -stdlib=libc++ -lc++
+SYSFLAGS 	+= -I$(OPENSSL_DIR)/include
+SYSLIBS  	+= -L$(OPENSSL_DIR)/lib
