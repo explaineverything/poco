@@ -1,0 +1,3 @@
+include $(POCO_BASE)/build/config/Linux-clang
+
+CXXFLAGS 	+= -std=c++14 -stdlib=libc++

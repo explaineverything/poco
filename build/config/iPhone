@@ -32,7 +32,9 @@ TOOL_PREFIX            ?= $(shell xcode-select -print-path)/Platforms/$(IPHONE_S
 ifneq ($(POCO_TARGET_OSARCH),arm64)
 THUMB = -mthumb
 endif
-OSFLAGS                ?= -arch $(POCO_TARGET_OSARCH) -isysroot $(IPHONE_SDK_BASE) $(THUMB) -miphoneos-version-min=$(IPHONE_SDK_VERSION_MIN) -fembed-bitcode
+APPLE_TARGET           ?= $(POCO_TARGET_OSARCH)-apple-ios11.4
+OSFLAGS                ?= -arch $(POCO_TARGET_OSARCH) -target $(APPLE_TARGET) -isysroot $(IPHONE_SDK_BASE) $(THUMB)
+CXX_CPP_STANDARD       ?= gnu++14
 
 #
 # Tools
@@ -66,7 +68,7 @@ SHAREDLIBLINKEXT = .dylib
 CFLAGS          = $(OSFLAGS) -std=gnu99
 CFLAGS32        =
 CFLAGS64        =
-CXXFLAGS        = $(OSFLAGS) -std=gnu++14 -stdlib=libc++ -Wall -Wno-sign-compare
+CXXFLAGS        = $(OSFLAGS) -std=$(CXX_CPP_STANDARD) -stdlib=libc++ -Wall -Wno-sign-compare
 CXXFLAGS32      =
 CXXFLAGS64      =
 LINKFLAGS       = $(OSFLAGS) -stdlib=libc++

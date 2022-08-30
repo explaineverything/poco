@@ -13,7 +13,8 @@ LINKMODE ?= SHARED
 
 ARCHFLAGS          ?= -arch $(OSARCH)
 SANITIZEFLAGS      ?=
-OSFLAGS            ?= -mmacosx-version-min=10.11 -isysroot $(shell xcrun --show-sdk-path)
+APPLE_TARGET       ?= $(POCO_TARGET_OSARCH)-apple-macos10.13
+OSFLAGS            ?= -target $(APPLE_TARGET) -isysroot $(shell xcrun --show-sdk-path)
 
 OPENSSL_DIR        ?= /usr/local/opt/openssl
 
