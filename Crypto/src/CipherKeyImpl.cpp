@@ -141,8 +141,10 @@ CipherKeyImpl::Mode CipherKeyImpl::mode() const
 	case EVP_CIPH_GCM_MODE:
 		return MODE_GCM;
 
+#ifndef OPENSSL_IS_BORINGSSL
 	case EVP_CIPH_CCM_MODE:
 		return MODE_CCM;
+#endif // OPENSSL_IS_BORINGSSL
 #endif
 	}
 	throw Poco::IllegalStateException("Unexpected value of EVP_CIPHER_mode()");

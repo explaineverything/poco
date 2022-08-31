@@ -23,6 +23,7 @@
 #include <vector>
 #include <openssl/evp.h>
 
+#ifndef OPENSSL_IS_BORINGSSL
 
 namespace Poco {
 namespace Crypto {
@@ -170,5 +171,6 @@ inline int Envelope::cipherNID() const
 
 } } // namespace Poco::Crypto
 
+#endif // OPENSSL_IS_BORINGSSL
 
 #endif // Crypto_Envelope_INCLUDED

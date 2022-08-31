@@ -15,6 +15,7 @@
 #include "Poco/Crypto/EVPPKey.h"
 #include <iostream>
 
+#ifndef OPENSSL_IS_BORINGSSL
 
 using Poco::Crypto::Envelope;
 using Poco::Crypto::EVPPKey;
@@ -145,3 +146,5 @@ CppUnit::Test* EnvelopeTest::suite()
 
 	return pSuite;
 }
+
+#endif // OPENSSL_IS_BORINGSSL

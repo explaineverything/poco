@@ -30,8 +30,10 @@
 #include "Poco/Util/Application.h"
 #include "Poco/Util/OptionException.h"
 #if OPENSSL_VERSION_NUMBER >= 0x10001000L
-#include <openssl/ocsp.h>
 #include <openssl/tls1.h>
+#ifndef OPENSSL_IS_BORINGSSL
+#include <openssl/ocsp.h>
+#endif // OPENSSL_IS_BORINGSSL
 #endif
 
 
@@ -278,7 +280,7 @@ int SSLManager::privateKeyPassphraseCallback(char* pBuf, int size, int flag, voi
 
 int SSLManager::verifyOCSPResponseCallback(SSL* pSSL, void* arg)
 {
-#if OPENSSL_VERSION_NUMBER >= 0x10001000L
+#if OPENSSL_VERSION_NUMBER >= 0x10001000L && !defined(OPENSSL_IS_BORINGSSL)
 	const long OCSP_VALIDITY_LEEWAY = 5*60;
 
 	Poco::Net::Context* pContext = static_cast<Poco::Net::Context*>(arg);

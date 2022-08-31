@@ -14,6 +14,7 @@
 
 #include "Poco/Crypto/Envelope.h"
 
+#ifndef OPENSSL_IS_BORINGSSL
 
 namespace Poco {
 namespace Crypto {
@@ -157,3 +158,5 @@ void Envelope::handleErrors(std::string&& msg)
 
 
 } } // namespace Poco::Crypto
+
+#endif

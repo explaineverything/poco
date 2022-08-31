@@ -34,6 +34,8 @@ CppUnit::Test* CryptoTestSuite::suite()
 	pSuite->addTest(EVPTest::suite());
 	pSuite->addTest(DigestEngineTest::suite());
 	pSuite->addTest(PKCS12ContainerTest::suite());
+#ifndef OPENSSL_IS_BORINGSSL
 	pSuite->addTest(EnvelopeTest::suite());
+#endif // OPENSSL_IS_BORINGSSL
 	return pSuite;
 }
