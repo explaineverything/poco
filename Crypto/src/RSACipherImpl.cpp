@@ -121,7 +121,6 @@ namespace
 		switch (_paddingMode)
 		{
 		case RSA_PADDING_PKCS1:
-		case RSA_PADDING_SSLV23:
 			size -= 11;
 			break;
 		case RSA_PADDING_PKCS1_OAEP:

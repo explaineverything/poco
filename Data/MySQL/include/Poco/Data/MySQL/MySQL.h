@@ -19,6 +19,7 @@
 
 
 #include "Poco/Foundation.h"
+#include <mysql/mysql.h>
 
 
 //
@@ -54,8 +55,24 @@
 	#if !defined(MySQL_EXPORTS)
 		#pragma comment(lib, "PocoDataMySQL" POCO_LIB_SUFFIX)
 	#endif
-	#pragma comment(lib, "libmysql")
+	#if defined(LIBMARIADB)
+		#pragma comment(lib, "libmariadb")
+	#else
+		#pragma comment(lib, "libmysql")
+	#endif
 #endif
 
+//
+// Detect support for JSON data type
+//
+#if defined(MARIADB_VERSION_ID)
+	#if MARIADB_VERSION_ID >= 100207
+		#define POCO_MYSQL_JSON
+	#endif
+#else
+	#if MYSQL_VERSION_ID >= 50708
+		#define POCO_MYSQL_JSON
+	#endif
+#endif
 
 #endif // MySQL_MySQL_INCLUDED
