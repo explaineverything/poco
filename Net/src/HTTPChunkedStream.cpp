@@ -13,7 +13,6 @@
 
 
 #include "Poco/Net/HTTPChunkedStream.h"
-#include "Poco/Net/HTTPStream.h"
 #include "Poco/Net/HTTPSession.h"
 #include "Poco/NumberFormatter.h"
 #include "Poco/NumberParser.h"
@@ -33,12 +32,11 @@ namespace Net {
 //
 
 
-HTTPChunkedStreamBuf::HTTPChunkedStreamBuf(HTTPSession& session, openmode mode, MessageHeader* pTrailer):
+HTTPChunkedStreamBuf::HTTPChunkedStreamBuf(HTTPSession& session, openmode mode):
 	HTTPBasicStreamBuf(HTTPBufferAllocator::BUFFER_SIZE, mode),
 	_session(session),
 	_mode(mode),
-	_chunk(0),
-	_pTrailer(pTrailer)
+	_chunk(0)
 {
 }
 
@@ -53,16 +51,7 @@ void HTTPChunkedStreamBuf::close()
 	if (_mode & std::ios::out)
 	{
 		sync();
-		_session.write("0\r\n", 3);
-		if (_pTrailer && !_pTrailer->empty())
-		{
-			HTTPOutputStream hos(_session);
-			_pTrailer->write(hos);
-		}
-		else
-		{
-			_session.write("\r\n", 2);
-		}
+		_session.write("0\r\n\r\n", 5);
 	}
 }
 
@@ -92,27 +81,10 @@ int HTTPChunkedStreamBuf::readFromDevice(char* buffer, std::streamsize length)
 		if (n > 0) _chunk -= n;
 		return n;
 	}
-	else
+	else 
 	{
-		int ch = _session.peek();
-		if (ch != eof && ch != '\r' && ch != '\n')
-		{
-			HTTPInputStream his(_session);
-			if (_pTrailer)
-			{
-				_pTrailer->read(his);
-			}
-			else
-			{
-				MessageHeader trailer;
-				trailer.read(his);
-			}
-		}
-		else
-		{
-			ch = _session.get();
-			while (ch != eof && ch != '\n') ch = _session.get();
-		}
+		int ch = _session.get();
+		while (ch != eof && ch != '\n') ch = _session.get();
 		return 0;
 	}
 }
@@ -135,8 +107,8 @@ int HTTPChunkedStreamBuf::writeToDevice(const char* buffer, std::streamsize leng
 //
 
 
-HTTPChunkedIOS::HTTPChunkedIOS(HTTPSession& session, HTTPChunkedStreamBuf::openmode mode, MessageHeader* pTrailer):
-	_buf(session, mode, pTrailer)
+HTTPChunkedIOS::HTTPChunkedIOS(HTTPSession& session, HTTPChunkedStreamBuf::openmode mode):
+	_buf(session, mode)
 {
 	poco_ios_init(&_buf);
 }
@@ -168,8 +140,8 @@ HTTPChunkedStreamBuf* HTTPChunkedIOS::rdbuf()
 Poco::MemoryPool HTTPChunkedInputStream::_pool(sizeof(HTTPChunkedInputStream));
 
 
-HTTPChunkedInputStream::HTTPChunkedInputStream(HTTPSession& session, MessageHeader* pTrailer):
-	HTTPChunkedIOS(session, std::ios::in, pTrailer),
+HTTPChunkedInputStream::HTTPChunkedInputStream(HTTPSession& session):
+	HTTPChunkedIOS(session, std::ios::in),
 	std::istream(&_buf)
 {
 }
@@ -207,8 +179,8 @@ void HTTPChunkedInputStream::operator delete(void* ptr)
 Poco::MemoryPool HTTPChunkedOutputStream::_pool(sizeof(HTTPChunkedOutputStream));
 
 
-HTTPChunkedOutputStream::HTTPChunkedOutputStream(HTTPSession& session, MessageHeader* pTrailer):
-	HTTPChunkedIOS(session, std::ios::out, pTrailer),
+HTTPChunkedOutputStream::HTTPChunkedOutputStream(HTTPSession& session):
+	HTTPChunkedIOS(session, std::ios::out),
 	std::ostream(&_buf)
 {
 }

@@ -25,7 +25,6 @@ public:
 	~SyslogTest();
 
 	void testListener();
-	void testChannelFacility();
 	void testChannelOpenClose();
 	void testOldBSD();
 	void testStructuredData();

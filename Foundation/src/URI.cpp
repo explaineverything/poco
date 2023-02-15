@@ -197,7 +197,7 @@ URI& URI::operator = (const char* uri)
 }
 
 
-void URI::swap(URI& uri) noexcept
+void URI::swap(URI& uri)
 {
 	std::swap(_scheme, uri._scheme);
 	std::swap(_userInfo, uri._userInfo);
@@ -257,7 +257,7 @@ std::string URI::toString() const
 	if (!_fragment.empty())
 	{
 		uri += '#';
-		uri.append(_fragment);
+		encode(_fragment, RESERVED_FRAGMENT, uri);
 	}
 	return uri;
 }
@@ -370,7 +370,7 @@ std::string URI::getQuery() const
 }
 
 
-URI::QueryParameters URI::getQueryParameters(bool plusIsSpace) const
+URI::QueryParameters URI::getQueryParameters() const
 {
 	QueryParameters result;
 	std::string::const_iterator it(_query.begin());
@@ -381,7 +381,7 @@ URI::QueryParameters URI::getQueryParameters(bool plusIsSpace) const
 		std::string value;
 		while (it != end && *it != '=' && *it != '&')
 		{
-			if (plusIsSpace && (*it == '+'))
+			if (*it == '+')
 				name += ' ';
 			else
 				name += *it;
@@ -392,7 +392,7 @@ URI::QueryParameters URI::getQueryParameters(bool plusIsSpace) const
 			++it;
 			while (it != end && *it != '&')
 			{
-				if (plusIsSpace && (*it == '+'))
+				if (*it == '+')
 					value += ' ';
 				else
 					value += *it;
@@ -420,24 +420,10 @@ void URI::setQueryParameters(const QueryParameters& params)
 }
 
 
-std::string URI::getFragment() const
-{
-	std::string fragment;
-	decode(_fragment, fragment);
-	return fragment;
-}
-
-
 void URI::setFragment(const std::string& fragment)
 {
 	_fragment.clear();
-	encode(fragment, RESERVED_FRAGMENT, _fragment);
-}
-
-
-void URI::setRawFragment(const std::string& fragment)
-{
-	_fragment = fragment;
+	decode(fragment, _fragment);
 }
 
 
@@ -464,7 +450,7 @@ std::string URI::getPathEtc() const
 	if (!_fragment.empty())
 	{
 		pathEtc += '#';
-		pathEtc += _fragment;
+		encode(_fragment, RESERVED_FRAGMENT, pathEtc);
 	}
 	return pathEtc;
 }
@@ -629,7 +615,7 @@ void URI::removeDotSegments(bool removeLeading)
 }
 
 
-void URI::getPathSegments(std::vector<std::string>& segments) const
+void URI::getPathSegments(std::vector<std::string>& segments)
 {
 	getPathSegments(_path, segments);
 }
@@ -896,8 +882,9 @@ void URI::parseQuery(std::string::const_iterator& it, const std::string::const_i
 
 void URI::parseFragment(std::string::const_iterator& it, const std::string::const_iterator& end)
 {
-	_fragment.clear();
-	while (it != end) _fragment += *it++;
+	std::string fragment;
+	while (it != end) fragment += *it++;
+	decode(fragment, _fragment);
 }
 
 

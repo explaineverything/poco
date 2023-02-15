@@ -30,7 +30,6 @@ public:
 	void testSocketConnectorFail();
 	void testSocketConnectorTimeout();
 	void testDataCollection();
-	void testSocketConnectorDeadlock();
 
 	void setUp();
 	void tearDown();

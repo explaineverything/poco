@@ -24,11 +24,7 @@ public:
 	HMACEngineTest(const std::string& name);
 	~HMACEngineTest();
 
-	void testHMAC_MD5();
-	void testHMAC_SHA2_224();
-	void testHMAC_SHA2_256();
-	void testHMAC_SHA2_384();
-	void testHMAC_SHA2_512();
+	void testHMAC();
 
 	void setUp();
 	void tearDown();

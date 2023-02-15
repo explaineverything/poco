@@ -89,7 +89,7 @@ MediaType& MediaType::operator = (const std::string& mediaType)
 }
 
 
-void MediaType::swap(MediaType& mediaType) noexcept
+void MediaType::swap(MediaType& mediaType)
 {
 	std::swap(_type, mediaType._type);
 	std::swap(_subType, mediaType._subType);

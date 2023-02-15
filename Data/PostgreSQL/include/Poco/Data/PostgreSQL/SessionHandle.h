@@ -89,7 +89,8 @@ public:
 
 	void connect(const char* aConnectionString);
 
-	void connect(const char* aHost, const char* aUser, const char* aPassword, const char* aDatabase, unsigned short aPort, unsigned int aConnectionTimeout);
+	void connect(const char* aHost, const char* aUser, const char* aPassword,
+		const char* aDatabase, unsigned short aPort, unsigned int aConnectionTimeout);
 
 	bool isConnected() const;
 		/// is a connection established?
@@ -154,9 +155,6 @@ public:
 
 	std::string clientEncoding() const;
 		/// returns the client encoding
-
-	std::string parameterStatus(const std::string& param) const;
-		/// Returns the value configured on the server for the given parameter.
 
 	int libpqVersion() const;
 		/// returns the version of libpq

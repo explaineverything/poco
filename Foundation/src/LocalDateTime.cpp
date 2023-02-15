@@ -12,11 +12,6 @@
 //
 
 
-#if defined(_MSC_VER) && !defined(_CRT_SECURE_NO_WARNINGS)
-#define _CRT_SECURE_NO_WARNINGS
-#endif
-
-
 #include "Poco/LocalDateTime.h"
 #include "Poco/Timezone.h"
 #include "Poco/Timespan.h"
@@ -25,8 +20,6 @@
 #include <ctime>
 #if defined(_WIN32_WCE) && _WIN32_WCE < 0x800
 #include "wce_time.h"
-#elif defined(_WIN32)
-#include <time.h>
 #endif
 
 
@@ -106,7 +99,7 @@ LocalDateTime::LocalDateTime(Timestamp::UtcTimeVal utcTime, Timestamp::TimeDiff 
 	adjustForTzd();
 }
 
-
+	
 LocalDateTime::~LocalDateTime()
 {
 }
@@ -186,31 +179,31 @@ bool LocalDateTime::operator == (const LocalDateTime& dateTime) const
 }
 
 
-bool LocalDateTime::operator != (const LocalDateTime& dateTime) const
+bool LocalDateTime::operator != (const LocalDateTime& dateTime) const	
 {
 	return utcTime() != dateTime.utcTime();
 }
 
 
-bool LocalDateTime::operator <  (const LocalDateTime& dateTime) const
+bool LocalDateTime::operator <  (const LocalDateTime& dateTime) const	
 {
 	return utcTime() < dateTime.utcTime();
 }
 
 
-bool LocalDateTime::operator <= (const LocalDateTime& dateTime) const
+bool LocalDateTime::operator <= (const LocalDateTime& dateTime) const	
 {
 	return utcTime() <= dateTime.utcTime();
 }
 
 
-bool LocalDateTime::operator >  (const LocalDateTime& dateTime) const
+bool LocalDateTime::operator >  (const LocalDateTime& dateTime) const	
 {
 	return utcTime() > dateTime.utcTime();
 }
 
 
-bool LocalDateTime::operator >= (const LocalDateTime& dateTime) const
+bool LocalDateTime::operator >= (const LocalDateTime& dateTime) const	
 {
 	return utcTime() >= dateTime.utcTime();
 }
@@ -271,23 +264,20 @@ void LocalDateTime::determineTzd(bool adjust)
 #if defined(_WIN32_WCE) && _WIN32_WCE < 0x800
 		std::tm* broken = wceex_localtime(&epochTime);
 #else
-		std::tm brokenBuf;
- 		std::tm* broken = &brokenBuf;
- 		errno_t err = localtime_s(broken, &epochTime);
- 		if (err) broken = nullptr;
+		std::tm* broken = std::localtime(&epochTime);
 #endif
 		if (!broken) throw Poco::SystemException("cannot get local time");
-		_tzd = Timezone::utcOffset() + Timezone::dst(_dateTime.timestamp());
+		_tzd = (Timezone::utcOffset() + ((broken->tm_isdst == 1) ? 3600 : 0));
 #else
 		std::tm broken;
-#if defined(POCO_VXWORKS) && (defined(_VXWORKS_COMPATIBILITY_MODE) || (defined(_WRS_VXWORKS_MAJOR) && ((_WRS_VXWORKS_MAJOR < 6) || ((_WRS_VXWORKS_MAJOR == 6)  && (_WRS_VXWORKS_MINOR < 9)))))
+#if defined(POCO_VXWORKS)
 		if (localtime_r(&epochTime, &broken) != OK)
 			throw Poco::SystemException("cannot get local time");
 #else
 		if (!localtime_r(&epochTime, &broken))
 			throw Poco::SystemException("cannot get local time");
 #endif
-		_tzd = Timezone::utcOffset() + Timezone::dst(_dateTime.timestamp());
+		_tzd = (Timezone::utcOffset() + ((broken.tm_isdst == 1) ? 3600 : 0));
 #endif
 		adjustForTzd();
 	}
@@ -305,8 +295,8 @@ std::time_t LocalDateTime::dstOffset(int& dstOffset) const
 	std::time_t local;
 	std::tm     broken;
 
-	broken.tm_year  = _dateTime.year() - 1900;
-	broken.tm_mon   = _dateTime.month() - 1;
+	broken.tm_year  = (_dateTime.year() - 1900);
+	broken.tm_mon   = (_dateTime.month() - 1);
 	broken.tm_mday  = _dateTime.day();
 	broken.tm_hour  = _dateTime.hour();
 	broken.tm_min   = _dateTime.minute();
@@ -317,8 +307,8 @@ std::time_t LocalDateTime::dstOffset(int& dstOffset) const
 #else
 	local = std::mktime(&broken);
 #endif
-
-	dstOffset = (broken.tm_isdst == 1) ? Timezone::dst(_dateTime.timestamp()) : 0;
+	
+	dstOffset = (broken.tm_isdst == 1) ? 3600 : 0;
 	return local;
 }
 

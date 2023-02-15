@@ -50,8 +50,6 @@ public:
 		FDT_DATE,
 		FDT_TIME,
 		FDT_TIMESTAMP,
-		FDT_UUID,
-		FDT_JSON,
 		FDT_UNKNOWN
 	};
 
@@ -78,7 +76,7 @@ public:
 	MetaColumn& operator = (MetaColumn&& other) noexcept;
 		/// Assignment operator.
 
-	void swap(MetaColumn& other) noexcept;
+	void swap(MetaColumn& other);
 		/// Swaps the contents with another instance.
 
 	~MetaColumn();

@@ -26,7 +26,6 @@ public:
 
 	void testLoad();
 	void testSetArrayElement();
-	void testConfigurationView();
 
 	void setUp();
 	void tearDown();

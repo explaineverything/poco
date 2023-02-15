@@ -35,9 +35,9 @@ namespace JSON {
 
 class JSON_API Parser: private ParserImpl
 	/// A parser for reading RFC 4627 compliant JSON from strings or streams.
-	///
+	/// 
 	/// Simple usage example:
-	///
+	/// 
 	///    std::string json = "{ \"name\" : \"Franky\", \"children\" : [ \"Jonas\", \"Ellen\" ] }";
 	///    Parser parser;
 	///    Var result = parser.parse(json);
@@ -54,18 +54,18 @@ class JSON_API Parser: private ParserImpl
 	/// containing a Poco::SharedPtr to an Object or Array instance.
 	///
 	/// Example:
-	///
+	/// 
 	///    std::string json = "{ \"name\" : \"Franky\", \"children\" : [ \"Jonas\", \"Ellen\" ] }";
 	///    Parser parser;
 	///    Var result = parser.parse(json);
-	///    Object::Ptr pObject = result.extract<Object::Ptr>();
-	///    std::string name = pObject->getValue<std::string>("name");
-	///    Array::Ptr pChildren = pObject->getArray("children");
+	///    Object::Ptr object = result.extract<Object::Ptr>();
+	///    std::string name = object.getValue<std::string>("name");
+	///    Array::Ptr children = object.getArray("children");
 	/// ----
 {
 public:
 
-	Parser(const Handler::Ptr& pHandler = new ParseHandler);
+	Parser(const Handler::Ptr& pHandler = new ParseHandler, std::size_t bufSize = JSON_PARSE_BUFFER_SIZE);
 		/// Creates JSON Parser, using the given Handler and buffer size.
 
 	virtual ~Parser();
@@ -76,24 +76,16 @@ public:
 
 	void setAllowComments(bool comments);
 		/// Allow or disallow comments. By default, comments are not allowed.
-		///
-		/// If set to true, comments will be filtered out of the input data
-		/// before passing the JSON on to the parser. This will impact performance,
-		/// especially when reading from a std::istream.
 
 	bool getAllowComments() const;
 		/// Returns true if comments are allowed, false otherwise.
 		///
 		/// By default, comments are not allowed.
-
+		
 	void setAllowNullByte(bool nullByte);
-		/// Allow or disallow null byte in strings.
+		/// Allow or disallow null byte in strings. 
 		///
-		/// By default, null byte is allowed (true).
-		///
-		/// If set to false, an additional check for "\u0000" will be performed
-		/// before passing the JSON on to the parser. This will impact performance,
-		/// especially when reading from a std::istream.
+		/// By default, null byte is allowed.
 
 	bool getAllowNullByte() const;
 		/// Returns true if null byte is allowed, false otherwise.
@@ -102,10 +94,6 @@ public:
 
 	void setDepth(std::size_t depth);
 		/// Sets the allowed JSON depth.
-		///
-		/// Default maximum depth is 128. Setting this value too high
-		/// may result in a stack overflow when parsing a (malicious)
-		/// JSON document.
 
 	std::size_t getDepth() const;
 		/// Returns the allowed JSON depth.

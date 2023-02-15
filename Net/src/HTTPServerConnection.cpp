@@ -76,8 +76,6 @@ void HTTPServerConnection::run()
 					response.set("Server", server);
 				try
 				{
-					session.requestTrailer().clear();
-					session.responseTrailer().clear();
 					std::unique_ptr<HTTPRequestHandler> pHandler(_pFactory->createRequestHandler(request));
 					if (pHandler.get())
 					{

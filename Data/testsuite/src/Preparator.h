@@ -98,9 +98,6 @@ public:
 	void prepare(std::size_t pos, const Poco::DateTime&);
 		/// Prepares a DateTime.
 
-	void prepare(std::size_t pos, const Poco::UUID&);
-		/// Prepares a UUID.
-
 	void prepare(std::size_t pos, const Poco::Any&);
 		/// Prepares an Any.
 

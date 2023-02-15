@@ -10,7 +10,6 @@
 #include "CppUnit/CppUnit.h"
 #include <string>
 #include <vector>
-#include <functional>
 
 
 namespace CppUnit {
@@ -34,10 +33,8 @@ public:
 	};
 
 public:
-	using Callback = std::function<std::string(const std::exception&)>;
-
 	virtual ~Test() = 0;
-	virtual void run(TestResult* result, const Callback& callback = nullptr) = 0;
+	virtual void run(TestResult* result) = 0;
 	virtual int countTestCases() const = 0;
 	virtual std::string toString() const = 0;
 	virtual Test::Type getType() const = 0;
@@ -46,7 +43,7 @@ public:
 	const std::vector<std::string>& setup() const;
 
 private:
-	std::vector<std::string> _setup;
+	std::vector<std::string>	_setup;
 };
 
 
@@ -56,7 +53,7 @@ inline Test::~Test()
 
 
 // Runs a test and collects its result in a TestResult instance.
-inline void Test::run(TestResult *result, const Callback& callback)
+inline void Test::run(TestResult *result)
 {
 }
 
@@ -64,7 +61,7 @@ inline void Test::run(TestResult *result, const Callback& callback)
 // Counts the number of test cases that will be run by this test.
 inline int Test::countTestCases() const
 {
-	return 0;
+	return 0; 
 }
 
 

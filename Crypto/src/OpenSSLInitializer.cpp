@@ -13,16 +13,15 @@
 
 
 #include "Poco/Crypto/OpenSSLInitializer.h"
-#include "Poco/Crypto/CryptoException.h"
 #include "Poco/RandomStream.h"
 #include "Poco/Thread.h"
 #include <openssl/ssl.h>
 #include <openssl/rand.h>
 #include <openssl/crypto.h>
 #include <openssl/err.h>
+#if OPENSSL_VERSION_NUMBER >= 0x0907000L
 #include <openssl/conf.h>
-
-
+#endif
 #if defined(POCO_OS_FAMILY_WINDOWS)
 	#define POCO_STR_HELPER(x) #x
 	#define POCO_STR(x) POCO_STR_HELPER(x)
@@ -59,16 +58,8 @@ namespace Poco {
 namespace Crypto {
 
 
-Poco::AtomicCounter OpenSSLInitializer::_rc;
-
-#if OPENSSL_VERSION_NUMBER < 0x10100000L
 Poco::FastMutex* OpenSSLInitializer::_mutexes(0);
-#endif
-
-#if OPENSSL_VERSION_NUMBER >= 0x30000000L
-OSSL_PROVIDER* OpenSSLInitializer::_defaultProvider(0);
-OSSL_PROVIDER* OpenSSLInitializer::_legacyProvider(0);
-#endif
+Poco::AtomicCounter OpenSSLInitializer::_rc;
 
 
 OpenSSLInitializer::OpenSSLInitializer()
@@ -98,15 +89,18 @@ void OpenSSLInitializer::initialize()
 	//Changed for port OpenSSL -> BoringSSL	(nothing needed here)
 #elif OPENSSL_VERSION_NUMBER >= 0x10100000L
 		CONF_modules_load(NULL, NULL, 0);
-#else
+#elif OPENSSL_VERSION_NUMBER >= 0x0907000L
 		OPENSSL_config(NULL);
 #endif
-
-#if OPENSSL_VERSION_NUMBER < 0x10100000L
 		SSL_library_init();
 		SSL_load_error_strings();
 		OpenSSL_add_all_algorithms();
-
+		
+		char seed[SEEDSIZE];
+		RandomInputStream rnd;
+		rnd.read(seed, sizeof(seed));
+		RAND_seed(seed, SEEDSIZE);
+		
 		int nMutexes = CRYPTO_num_locks();
 		_mutexes = new Poco::FastMutex[nMutexes];
 		CRYPTO_set_locking_callback(&OpenSSLInitializer::lock);
@@ -115,33 +109,14 @@ void OpenSSLInitializer::initialize()
 // https://sourceforge.net/p/poco/bugs/110/
 //
 // From http://www.openssl.org/docs/crypto/threads.html :
-// "If the application does not register such a callback using CRYPTO_THREADID_set_callback(),
-//  then a default implementation is used - on Windows and BeOS this uses the system's
+// "If the application does not register such a callback using CRYPTO_THREADID_set_callback(), 
+//  then a default implementation is used - on Windows and BeOS this uses the system's 
 //  default thread identifying APIs"
 		CRYPTO_set_id_callback(&OpenSSLInitializer::id);
 #endif
 		CRYPTO_set_dynlock_create_callback(&OpenSSLInitializer::dynlockCreate);
 		CRYPTO_set_dynlock_lock_callback(&OpenSSLInitializer::dynlock);
 		CRYPTO_set_dynlock_destroy_callback(&OpenSSLInitializer::dynlockDestroy);
-
-		char seed[SEEDSIZE];
-		RandomInputStream rnd;
-		rnd.read(seed, sizeof(seed));
-		RAND_seed(seed, SEEDSIZE);
-#endif
-
-#if OPENSSL_VERSION_NUMBER >= 0x30000000L
-		if (!_defaultProvider)
-		{
-			_defaultProvider = OSSL_PROVIDER_load(NULL, "default");
-			if (!_defaultProvider) throw CryptoException("Failed to load OpenSSL default provider");
-		}
-		if (!_legacyProvider)
-		{
-			_legacyProvider = OSSL_PROVIDER_load(NULL, "legacy");
-			if (!_legacyProvider) throw CryptoException("Failed to load OpenSSL legacy provider");
-		}
-#endif
 	}
 }
 
@@ -150,7 +125,6 @@ void OpenSSLInitializer::uninitialize()
 {
 	if (--_rc == 0)
 	{
-#if OPENSSL_VERSION_NUMBER < 0x10100000L
 		EVP_cleanup();
 		ERR_free_strings();
 		CRYPTO_set_locking_callback(0);
@@ -158,12 +132,10 @@ void OpenSSLInitializer::uninitialize()
 		CRYPTO_set_id_callback(0);
 #endif
 		delete [] _mutexes;
-#endif
+		
+		CONF_modules_free();
 	}
 }
-
-
-#if OPENSSL_VERSION_NUMBER < 0x10100000L
 
 
 void OpenSSLInitializer::lock(int mode, int n, const char* file, int line)
@@ -205,9 +177,6 @@ void OpenSSLInitializer::dynlockDestroy(struct CRYPTO_dynlock_value* lock, const
 {
 	delete lock;
 }
-
-
-#endif // OPENSSL_VERSION_NUMBER < 0x10100000L
 
 
 void initializeCrypto()
