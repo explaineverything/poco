@@ -11,25 +11,27 @@ LINKMODE           ?= SHARED
 ANDROID_ABI        ?= armeabi-v7a
 POCO_TARGET_OSNAME  = Android
 POCO_TARGET_OSARCH  = $(ANDROID_ABI)
+ANDROID_NDK         ?= ""
 
 ifeq ($(ANDROID_ABI),armeabi-v7a)
-COMPILER  = armv7a-linux-androideabi26
-TOOL      = llvm
+COMPILER  = ${ANDROID_NDK}/armv7a-linux-androideabi26
+TOOL      = ${ANDROID_NDK}/llvm
 ARCHFLAGS = -mfloat-abi=softfp -marm -march=armv7-a -mtune=cortex-a15 -mfpu=neon 
 else
 ifeq ($(ANDROID_ABI),i686)
-COMPILER  = i686-linux-android26
-TOOL      = llvm
+COMPILER  = ${ANDROID_NDK}/i686-linux-android26
+TOOL      = ${ANDROID_NDK}/llvm
 ARCHFLAGS = -march=bonnell -msse3 -mfpmath=sse 
 else
 ifeq ($(ANDROID_ABI),arm64-v8a)
-COMPILER  = aarch64-linux-android26
-TOOL      = llvm
+COMPILER  = ${ANDROID_NDK}/aarch64-linux-android26
+TOOL      = ${ANDROID_NDK}/llvm
 else
 ifeq ($(ANDROID_ABI),x86_64)
-COMPILER  = x86_64-linux-android26
-TOOL      = llvm
-ARCHFLAGS = -march=sandybridge -msse4.2 -mpopcnt -m64
+COMPILER  = ${ANDROID_NDK}/x86_64-linux-android26
+TOOL      = ${ANDROID_NDK}/llvm
+# INFO: Had to be removed due to: https://explaineverything.atlassian.net/browse/EE-1995 
+# ARCHFLAGS = -march=sandybridge -msse4.2 -mpopcnt -m64
 else
 $(error Invalid ABI specified in ANDROID_ABI)
 endif
@@ -63,12 +65,10 @@ SHAREDLIBLINKEXT = .so
 #
 # Compiler and Linker Flags
 #
-CFLAGS          = $(ARCHFLAGS) -stdlib=libc++ -fpic -funwind-tables -fstack-protector -fno-strict-aliasing -finline-limit=64 -Wno-deprecated-declarations -Wno-unused-command-line-argument -Wno-ignored-optimization-argument 
--Wno-macro-redefined
+CFLAGS          = $(ARCHFLAGS) -stdlib=libc++ -fpic -funwind-tables -fstack-protector -fno-strict-aliasing -finline-limit=64 -Wno-deprecated-declarations -Wno-unused-command-line-argument -Wno-ignored-optimization-argument -Wno-macro-redefined
 CFLAGS32        =
 CFLAGS64        =
-CXXFLAGS        = $(ARCHFLAGS) -stdlib=libc++ -fpic -funwind-tables -fstack-protector -fno-strict-aliasing -finline-limit=64 -frtti -fexceptions -Wno-deprecated-declarations -Wno-unused-command-line-argument 
--Wno-ignored-optimization-argument -Wno-macro-redefined
+CXXFLAGS        = $(ARCHFLAGS) -stdlib=libc++ -fpic -funwind-tables -fstack-protector -fno-strict-aliasing -finline-limit=64 -frtti -fexceptions -Wno-deprecated-declarations -Wno-unused-command-line-argument -Wno-ignored-optimization-argument -Wno-macro-redefined
 CXXFLAGS32      =
 CXXFLAGS64      =
 LINKFLAGS       = 
