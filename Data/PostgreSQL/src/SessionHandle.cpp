@@ -86,7 +86,7 @@ void SessionHandle::connect(const std::string& aConnectionString)
 
 	_pConnection = PQconnectdb(aConnectionString.c_str());
 
-	if (!isConnectedNoLock())
+	if (! isConnectedNoLock())
 	{
 		throw ConnectionFailedException(std::string("Connection Error: ") + lastErrorNoLock());
 	}
@@ -151,7 +151,6 @@ void SessionHandle::disconnect()
 	}
 }
 
-
 // TODO: Figure out what happens if a connection is reset with a pending transaction
 bool SessionHandle::reset()
 {
@@ -175,7 +174,7 @@ std::string SessionHandle::lastError() const
 {
 	Poco::FastMutex::ScopedLock mutexLocker(_sessionMutex);
 
-	if (!isConnectedNoLock())
+	if (! isConnectedNoLock())
 	{
 		return std::string();
 	}
@@ -197,7 +196,7 @@ void SessionHandle::startTransaction()
 {
 	Poco::FastMutex::ScopedLock mutexLocker(_sessionMutex);
 
-	if (!isConnectedNoLock())
+	if (! isConnectedNoLock())
 	{
 		throw NotConnectedException();
 	}
@@ -224,7 +223,7 @@ void SessionHandle::commit()
 {
 	Poco::FastMutex::ScopedLock mutexLocker(_sessionMutex);
 
-	if (!isConnectedNoLock())
+	if (! isConnectedNoLock())
 	{
 		throw NotConnectedException();
 	}
@@ -248,7 +247,7 @@ void SessionHandle::rollback()
 {
 	Poco::FastMutex::ScopedLock mutexLocker(_sessionMutex);
 
-	if (!isConnectedNoLock())
+	if (! isConnectedNoLock())
 	{
 		throw NotConnectedException();
 	}
@@ -292,7 +291,7 @@ void SessionHandle::setAsynchronousCommit(bool aShouldAsynchronousCommit)
 {
 	Poco::FastMutex::ScopedLock mutexLocker(_sessionMutex);
 
-	if (!isConnectedNoLock())
+	if (! isConnectedNoLock())
 	{
 		throw NotConnectedException();
 	}
@@ -319,7 +318,7 @@ void SessionHandle::cancel()
 {
 	Poco::FastMutex::ScopedLock mutexLocker(_sessionMutex);
 
-	if (!isConnectedNoLock())
+	if (! isConnectedNoLock())
 	{
 		throw NotConnectedException();
 	}
@@ -336,7 +335,7 @@ void SessionHandle::setTransactionIsolation(Poco::UInt32 aTI)
 {
 	Poco::FastMutex::ScopedLock mutexLocker(_sessionMutex);
 
-	if (!isConnectedNoLock())
+	if (! isConnectedNoLock())
 	{
 		throw NotConnectedException();
 	}
@@ -346,7 +345,7 @@ void SessionHandle::setTransactionIsolation(Poco::UInt32 aTI)
 		return;
 	}
 
-	if (!hasTransactionIsolation(aTI))
+	if (! hasTransactionIsolation(aTI))
 	{
 		throw Poco::InvalidArgumentException("setTransactionIsolation()");
 	}
@@ -355,12 +354,12 @@ void SessionHandle::setTransactionIsolation(Poco::UInt32 aTI)
 
 	switch (aTI)
 	{
-	case Session::TRANSACTION_READ_COMMITTED:
-		isolationLevel = POSTGRESQL_READ_COMMITTED; break;
-	case Session::TRANSACTION_REPEATABLE_READ:
-		isolationLevel = POSTGRESQL_REPEATABLE_READ; break;
-	case Session::TRANSACTION_SERIALIZABLE:
-		isolationLevel = POSTGRESQL_SERIALIZABLE; break;
+		case Session::TRANSACTION_READ_COMMITTED:
+			isolationLevel = POSTGRESQL_READ_COMMITTED; break;
+		case Session::TRANSACTION_REPEATABLE_READ:
+			isolationLevel = POSTGRESQL_REPEATABLE_READ; break;
+		case Session::TRANSACTION_SERIALIZABLE:
+			isolationLevel = POSTGRESQL_SERIALIZABLE; break;
 	}
 
 	PGresult* pPQResult = PQexec(_pConnection, Poco::format("SET SESSION CHARACTERISTICS AS TRANSACTION ISOLATION LEVEL %s", isolationLevel).c_str());
@@ -394,12 +393,12 @@ void SessionHandle::deallocatePreparedStatement(const std::string& aPreparedStat
 {
 	Poco::FastMutex::ScopedLock mutexLocker(_sessionMutex);
 
-	if (!isConnectedNoLock())
+	if (! isConnectedNoLock())
 	{
 		throw NotConnectedException();
 	}
 
-	if (!_inTransaction)
+	if (! _inTransaction)
 	{
 		deallocatePreparedStatementNoLock(aPreparedStatementToDeAllocate);
 	}
@@ -432,7 +431,7 @@ void SessionHandle::deallocatePreparedStatementNoLock(const std::string& aPrepar
 void SessionHandle::deallocateStoredPreparedStatements()
 {
 	// DO NOT ACQUIRE THE MUTEX IN PRIVATE METHODS
-	while (!_preparedStatementsToBeDeallocated.empty())
+	while (! _preparedStatementsToBeDeallocated.empty())
 	{
 		deallocatePreparedStatementNoLock(_preparedStatementsToBeDeallocated.back());
 
@@ -445,7 +444,7 @@ int SessionHandle::serverVersion() const
 {
 	Poco::FastMutex::ScopedLock mutexLocker(_sessionMutex);
 
-	if (!isConnectedNoLock())
+	if (! isConnectedNoLock())
 	{
 		throw NotConnectedException();
 	}
@@ -458,7 +457,7 @@ int SessionHandle::serverProcessID() const
 {
 	Poco::FastMutex::ScopedLock mutexLocker(_sessionMutex);
 
-	if (!isConnectedNoLock())
+	if (! isConnectedNoLock())
 	{
 		throw NotConnectedException();
 	}
@@ -471,7 +470,7 @@ int SessionHandle::protocoVersion() const
 {
 	Poco::FastMutex::ScopedLock mutexLocker(_sessionMutex);
 
-	if (!isConnectedNoLock())
+	if (! isConnectedNoLock())
 	{
 		throw NotConnectedException();
 	}
@@ -484,29 +483,12 @@ std::string SessionHandle::clientEncoding() const
 {
 	Poco::FastMutex::ScopedLock mutexLocker(_sessionMutex);
 
-	if (!isConnectedNoLock())
+	if (! isConnectedNoLock())
 	{
 		throw NotConnectedException();
 	}
 
 	return pg_encoding_to_char(PQclientEncoding(_pConnection));
-}
-
-
-std::string SessionHandle::parameterStatus(const std::string& param) const
-{
-	Poco::FastMutex::ScopedLock mutexLocker(_sessionMutex);
-
-	if (!isConnectedNoLock())
-	{
-		throw NotConnectedException();
-	}
-
-	const char* pValue = PQparameterStatus(_pConnection, param.c_str());
-	if (pValue)
-		return std::string(pValue);
-	else
-		return std::string();
 }
 
 
@@ -520,7 +502,7 @@ SessionParametersMap SessionHandle::setConnectionInfoParameters(PQconninfoOption
 {
 	SessionParametersMap sessionParametersMap;
 
-	while (pConnInfOpt->keyword)
+	while (0 != pConnInfOpt->keyword)
 	{
 		try
 		{
@@ -560,7 +542,7 @@ SessionParametersMap SessionHandle::connectionDefaultParameters()
 
 SessionParametersMap SessionHandle::connectionParameters() const
 {
-	if (!isConnected())
+	if (! isConnected())
 	{
 		throw NotConnectedException();
 	}

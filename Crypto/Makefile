@@ -6,15 +6,11 @@
 
 include $(POCO_BASE)/build/rules/global
 
-# see https://github.com/pocoproject/poco/issues/3073
-GLOBAL_SYSLIBS := $(SYSLIBS)
-SYSLIBS = -lssl -lcrypto
-SYSLIBS += $(GLOBAL_SYSLIBS)
+SYSLIBS += -lssl -lcrypto
 
 objects = Cipher CipherFactory CipherImpl CipherKey CipherKeyImpl \
-	CryptoException CryptoStream CryptoTransform \
-	ECDSADigestEngine ECKey ECKeyImpl Envelope \
-	EVPCipherImpl EVPPKey KeyPair KeyPairImpl PKCS12Container \
+	CryptoException CryptoStream CryptoTransform ECDSADigestEngine \
+	ECKey ECKeyImpl EVPPKey KeyPair KeyPairImpl PKCS12Container \
 	RSACipherImpl RSAKey RSAKeyImpl RSADigestEngine DigestEngine \
 	X509Certificate OpenSSLInitializer
 

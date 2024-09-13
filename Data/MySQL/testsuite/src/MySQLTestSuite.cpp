@@ -11,7 +11,6 @@
 #include "MySQLTestSuite.h"
 #include "MySQLTest.h"
 
-
 CppUnit::Test* MySQLTestSuite::suite()
 {
 	CppUnit::TestSuite* pSuite = new CppUnit::TestSuite("MySQLTestSuite");

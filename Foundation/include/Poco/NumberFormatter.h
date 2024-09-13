@@ -192,7 +192,7 @@ public:
 
 	static std::string formatHex(unsigned long long value, bool prefix = false);
 		/// Formats a 64-bit integer value in hexadecimal notation.
-		/// If prefix is true, "0x" prefix is prepended to the
+		/// If prefix is true, "0x" prefix is prepended to the 
 		/// resulting string.
 
 	static std::string formatHex(unsigned long long value, int width, bool prefix = false);
@@ -217,7 +217,7 @@ public:
 
 	static std::string formatHex(Int64 value, bool prefix = false);
 		/// Formats a 64-bit integer value in hexadecimal notation.
-		/// If prefix is true, "0x" prefix is prepended to the
+		/// If prefix is true, "0x" prefix is prepended to the 
 		/// resulting string.
 		/// The value is treated as unsigned.
 
@@ -849,8 +849,6 @@ inline std::string NumberFormatter::format(float value)
 
 inline std::string NumberFormatter::format(float value, int precision)
 {
-	if (precision < 0)
-		throw InvalidArgumentException("NumberFormatter::format() requires non-negative precision.");
 	char buffer[POCO_MAX_FLT_STRING_LEN];
 	floatToFixedStr(buffer, POCO_MAX_FLT_STRING_LEN, value, precision);
 	return std::string(buffer);
@@ -859,8 +857,6 @@ inline std::string NumberFormatter::format(float value, int precision)
 
 inline std::string NumberFormatter::format(float value, int width, int precision)
 {
-	if (precision < 0)
-		throw InvalidArgumentException("NumberFormatter::format() requires non-negative precision.");
 	std::string result;
 	floatToFixedStr(result, value, precision, width);
 	return result;
@@ -877,8 +873,6 @@ inline std::string NumberFormatter::format(double value)
 
 inline std::string NumberFormatter::format(double value, int precision)
 {
-	if (precision < 0)
-		throw InvalidArgumentException("NumberFormatter::format() requires non-negative precision.");
 	char buffer[POCO_MAX_FLT_STRING_LEN];
 	doubleToFixedStr(buffer, POCO_MAX_FLT_STRING_LEN, value, precision);
 	return std::string(buffer);
@@ -887,8 +881,6 @@ inline std::string NumberFormatter::format(double value, int precision)
 
 inline std::string NumberFormatter::format(double value, int width, int precision)
 {
-	if (precision < 0)
-		throw InvalidArgumentException("NumberFormatter::format() requires non-negative precision.");
 	std::string result;
 	doubleToFixedStr(result, value, precision, width);
 	return result;

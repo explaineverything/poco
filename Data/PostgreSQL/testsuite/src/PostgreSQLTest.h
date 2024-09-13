@@ -82,7 +82,6 @@ public:
 	void testUnsignedInts();
 	void testFloat();
 	void testDouble();
-	void testUUID();
 
 	void testTuple();
 	void testTupleVector();
@@ -95,18 +94,6 @@ public:
 	void testNullableInt();
 	void testNullableString();
 	void testTupleWithNullable();
-
-	void testBinarySimpleAccess();
-	void testBinaryComplexType();
-	void testBinarySimpleAccessVector();
-	void testBinaryComplexTypeVector();
-	void testBinaryInts();
-	void testBinaryFloat();
-	void testBinaryDouble();
-	void testBinaryUUID();
-	void testBinaryDateTime();
-	void testBinaryBLOBStmt();
-	void testBinaryCLOBStmt();
 
 	void testSessionTransaction();
 	void testTransaction();
@@ -131,8 +118,6 @@ private:
 	void recreateIntsTable();
 	void recreateUnsignedIntsTable();
 	void recreateFloatsTable();
-	void recreateDoublesTable();
-	void recreateUUIDsTable();
 	void recreateTuplesTable();
 	void recreateVectorsTable();
 	void recreateNullableIntTable();

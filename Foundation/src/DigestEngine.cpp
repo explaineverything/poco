@@ -13,7 +13,6 @@
 
 
 #include "Poco/DigestEngine.h"
-#include "Poco/Format.h"
 #include "Poco/Exception.h"
 
 
@@ -30,22 +29,15 @@ DigestEngine::~DigestEngine()
 }
 
 
-std::string DigestEngine::digestToHex(const Digest& bytes, std::size_t length)
+std::string DigestEngine::digestToHex(const Digest& bytes)
 {
 	static const char digits[] = "0123456789abcdef";
-	const std::size_t fullLen = bytes.size()*2;
-	std::size_t len = length ? length*2 : fullLen;
-	if (len > fullLen)
-		throw Poco::InvalidArgumentException(
-			Poco::format("DigestEngine::digestToHex(): invalid length : %z,"
-				"max alllowed is %z", length, fullLen));
 	std::string result;
-	result.reserve(len);
+	result.reserve(bytes.size() * 2);
 	for (auto b: bytes)
 	{
 		result += digits[(b >> 4) & 0xF];
 		result += digits[b & 0xF];
-		if (result.size() >= len) break;
 	}
 	return result;
 }

@@ -78,7 +78,6 @@ public:
 	using ResultPtr = SharedPtr<Result>;
 	using AsyncExecMethod = ActiveMethod<std::size_t, bool, StatementImpl>;
 	using AsyncExecMethodPtr = SharedPtr<AsyncExecMethod>;
-	using State = StatementImpl::State;
 
 	static const int WAIT_FOREVER = -1;
 
@@ -125,7 +124,7 @@ public:
 	Statement& operator = (Statement&& stmt) noexcept;
 		/// Move assignment.
 
-	void swap(Statement& other) noexcept;
+	void swap(Statement& other);
 		/// Swaps the statement with another one.
 
 	template <typename T>
@@ -385,9 +384,6 @@ public:
 	void setRowFormatter(RowFormatter::Ptr pRowFormatter);
 		/// Sets the row formatter for this statement.
 		/// Statement takes the ownership of the formatter.
-
-	State state() const;
-		/// Returns the statement state.
 
 protected:
 	using ImplPtr = StatementImpl::Ptr;
@@ -795,12 +791,6 @@ inline bool Statement::isAsync() const
 }
 
 
-inline Statement::State Statement::state() const
-{
-	return _pImpl->getState();
-}
-
-
 inline void Statement::setRowFormatter(RowFormatter::Ptr pRowFormatter)
 {
 	_pRowFormatter = pRowFormatter;
@@ -814,7 +804,7 @@ inline const RowFormatter::Ptr& Statement::getRowFormatter()
 }
 
 
-inline void swap(Statement& s1, Statement& s2) noexcept
+inline void swap(Statement& s1, Statement& s2)
 {
 	s1.swap(s2);
 }

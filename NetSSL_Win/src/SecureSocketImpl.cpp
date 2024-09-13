@@ -212,33 +212,7 @@ void SecureSocketImpl::connectNB(const SocketAddress& address)
 
 void SecureSocketImpl::bind(const SocketAddress& address, bool reuseAddress)
 {
-	poco_check_ptr (_pSocket);
-
 	_pSocket->bind(address, reuseAddress);
-}
-
-
-void SecureSocketImpl::bind(const SocketAddress& address, bool reuseAddress, bool reusePort)
-{
-	poco_check_ptr (_pSocket);
-
-	_pSocket->bind(address, reuseAddress, reusePort);
-}
-
-
-void SecureSocketImpl::bind6(const SocketAddress& address, bool reuseAddress, bool ipV6Only)
-{
-	poco_check_ptr (_pSocket);
-
-	_pSocket->bind6(address, reuseAddress, ipV6Only);
-}
-
-
-void SecureSocketImpl::bind6(const SocketAddress& address, bool reuseAddress, bool reusePort, bool ipV6Only)
-{
-	poco_check_ptr (_pSocket);
-
-	_pSocket->bind6(address, reuseAddress, reusePort, ipV6Only);
 }
 
 
@@ -578,10 +552,10 @@ SECURITY_STATUS SecureSocketImpl::decodeMessage(BYTE* pBuffer, DWORD bufSize, Au
 	{
 		for (int i = 1; i < 4; ++i)
 		{
-			if (!pDataBuffer && msg[i].BufferType == SECBUFFER_DATA)
+			if (pDataBuffer == 0 && msg[i].BufferType == SECBUFFER_DATA)
 				pDataBuffer = &msg[i];
 
-			if (!pExtraBuffer && msg[i].BufferType == SECBUFFER_EXTRA)
+			if (pExtraBuffer == NULL && msg[i].BufferType == SECBUFFER_EXTRA)
 				pExtraBuffer = &msg[i];
 		}
 	}
@@ -657,15 +631,15 @@ SECURITY_STATUS SecureSocketImpl::decodeBufferFull(BYTE* pBuffer, DWORD bufSize,
 		}
 		else
 		{
-			if (securityStatus == SEC_E_OK)
+			// everything decoded
+			if (securityStatus != SEC_E_OK && securityStatus != SEC_E_INCOMPLETE_MESSAGE && securityStatus != SEC_I_RENEGOTIATE && securityStatus != SEC_I_CONTEXT_EXPIRED)
 			{
-				// everything decoded
+				throw SSLException("Failed to decode data", Utility::formatError(securityStatus));
+			}
+			else if (securityStatus == SEC_E_OK)
+			{
 				pBuffer = 0;
 				bufSize = 0;
-			}
-			else if (securityStatus != SEC_E_INCOMPLETE_MESSAGE && securityStatus != SEC_I_RENEGOTIATE && securityStatus != SEC_I_CONTEXT_EXPIRED)
-			{
-				return securityStatus;
 			}
 		}
 
@@ -726,7 +700,7 @@ void SecureSocketImpl::connectSSL(bool completeHandshake)
 
 	if (_peerHostName.empty())
 	{
-		_peerHostName = _pSocket->peerAddress().host().toString();
+		_peerHostName = _pSocket->address().host().toString();
 	}
 
 	initClientContext();
@@ -1317,7 +1291,7 @@ void SecureSocketImpl::verifyCertificateChainClient(PCCERT_CONTEXT pServerCert)
 
 			// Revocation check of the root certificate may fail due to missing CRL points, etc.
 			// We ignore all errors checking the root certificate except CRYPT_E_REVOKED.
-			if (!ok && revStat.dwIndex < certs.size() - 1 && revStat.dwError == CRYPT_E_REVOKED)
+			if (!ok && (revStat.dwIndex < certs.size() - 1 || revStat.dwError == CRYPT_E_REVOKED))
 			{
 				VerificationErrorArgs args(cert, revStat.dwIndex, revStat.dwReason, Utility::formatError(revStat.dwError));
 				SSLManager::instance().ClientVerificationError(this, args);
@@ -1421,10 +1395,7 @@ void SecureSocketImpl::serverVerifyCertificate()
 						CERT_VERIFY_REV_CHAIN_FLAG,
 						NULL,
 						&revStat);
-
-		// Revocation check of the root certificate may fail due to missing CRL points, etc.
-		// We ignore all errors checking the root certificate except CRYPT_E_REVOKED.
-		if (!ok && revStat.dwIndex < certs.size() - 1 && revStat.dwError == CRYPT_E_REVOKED)
+		if (!ok && (revStat.dwIndex < certs.size() - 1 || revStat.dwError == CRYPT_E_REVOKED))
 		{
 			VerificationErrorArgs args(cert, revStat.dwIndex, revStat.dwReason, Utility::formatError(revStat.dwReason));
 			SSLManager::instance().ServerVerificationError(this, args);
@@ -1551,7 +1522,7 @@ void SecureSocketImpl::stateIllegal()
 
 void SecureSocketImpl::stateConnected()
 {
-	_peerHostName = _pSocket->peerAddress().host().toString();
+	_peerHostName = _pSocket->address().host().toString();
 	initClientContext();
 	performInitialClientHandshake();
 }

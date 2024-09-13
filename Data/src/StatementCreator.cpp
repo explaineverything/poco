@@ -57,7 +57,7 @@ StatementCreator& StatementCreator::operator = (StatementCreator&& other) noexce
 	return *this;
 }
 
-void StatementCreator::swap(StatementCreator& other) noexcept
+void StatementCreator::swap(StatementCreator& other)
 {
 	using std::swap;
 	swap(_ptrImpl, other._ptrImpl);

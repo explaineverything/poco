@@ -49,7 +49,7 @@ URIRedirection& URIRedirection::operator = (const URIRedirection& redir)
 }
 
 
-void URIRedirection::swap(URIRedirection& redir) noexcept
+void URIRedirection::swap(URIRedirection& redir)
 {
 	std::swap(_uri, redir._uri);
 }

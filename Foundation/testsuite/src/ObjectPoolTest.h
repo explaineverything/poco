@@ -25,7 +25,6 @@ public:
 	~ObjectPoolTest();
 
 	void testObjectPool();
-	void testObjectPoolWaitOnBorrowObject();
 
 	void setUp();
 	void tearDown();

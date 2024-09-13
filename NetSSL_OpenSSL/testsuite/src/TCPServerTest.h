@@ -29,7 +29,6 @@ public:
 	void testMultiConnections();
 	void testReuseSocket();
 	void testReuseSession();
-	void testContextInvalidCertificateHandler();
 
 	void setUp();
 	void tearDown();

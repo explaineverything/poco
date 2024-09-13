@@ -108,9 +108,6 @@ public:
 	virtual void bind(std::size_t pos, const Time& val, Direction dir = PD_IN);
 		/// Binds a Time.
 
-	virtual void bind(std::size_t pos, const UUID& val, Direction dir = PD_IN);
-		/// Binds a UUID.
-
 	virtual void bind(std::size_t pos, const NullData& val, Direction dir = PD_IN);
 		/// Binds a null.
 

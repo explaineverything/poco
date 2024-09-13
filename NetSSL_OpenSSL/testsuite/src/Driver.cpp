@@ -37,10 +37,9 @@ public:
 	{
 		CppUnit::TestRunner runner;
 		runner.addTest("NetSSLTestSuite", NetSSLTestSuite::suite());
-		CppUnitPocoExceptionText (exc);
-		return runner.run(_targs, exc) ? 0 : 1;
+		return runner.run(_targs) ? 0 : 1;
 	}
-
+	
 	void setup(int argc, char** argv)
 	{
 		init(1, argv);
@@ -54,7 +53,7 @@ protected:
 		loadConfiguration(); // load default configuration files, if present
 		Poco::Util::Application::initialize(self);
 	}
-
+	
 private:
 	std::vector<std::string> _targs;
 };

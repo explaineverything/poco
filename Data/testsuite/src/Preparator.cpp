@@ -135,11 +135,6 @@ void Preparator::prepare(std::size_t pos, const Poco::DateTime&)
 }
 
 
-void Preparator::prepare(std::size_t pos, const Poco::UUID&)
-{
-}
-
-
 void Preparator::prepare(std::size_t pos, const Poco::Any&)
 {
 }

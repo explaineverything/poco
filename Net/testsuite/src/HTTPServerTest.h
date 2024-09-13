@@ -38,7 +38,6 @@ public:
 	void testAuth();
 	void testNotImpl();
 	void testBuffer();
-	void testChunkedTrailer();
 
 	void setUp();
 	void tearDown();

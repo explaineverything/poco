@@ -63,7 +63,7 @@ protected:
 
 	int getCount() const;
 private:
-	std::atomic<int> _count;
+	int		_count;
 };
 
 

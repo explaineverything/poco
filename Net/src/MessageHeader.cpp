@@ -28,18 +28,14 @@ namespace Net {
 
 
 MessageHeader::MessageHeader():
-	_fieldLimit(DFL_FIELD_LIMIT),
-	_nameLengthLimit(DFL_NAME_LENGTH_LIMIT),
-	_valueLengthLimit(DFL_VALUE_LENGTH_LIMIT)
+	_fieldLimit(DFL_FIELD_LIMIT)
 {
 }
 
 
 MessageHeader::MessageHeader(const MessageHeader& messageHeader):
 	NameValueCollection(messageHeader),
-	_fieldLimit(DFL_FIELD_LIMIT),
-	_nameLengthLimit(DFL_NAME_LENGTH_LIMIT),
-	_valueLengthLimit(DFL_VALUE_LENGTH_LIMIT)
+	_fieldLimit(DFL_FIELD_LIMIT)
 {
 }
 
@@ -84,12 +80,12 @@ void MessageHeader::read(std::istream& istr)
 			throw MessageException("Too many header fields");
 		name.clear();
 		value.clear();
-		while (ch != eof && ch != ':' && ch != '\n' && name.length() < _nameLengthLimit) { name += ch; ch = buf.sbumpc(); }
+		while (ch != eof && ch != ':' && ch != '\n' && name.length() < MAX_NAME_LENGTH) { name += ch; ch = buf.sbumpc(); }
 		if (ch == '\n') { ch = buf.sbumpc(); continue; } // ignore invalid header lines
 		if (ch != ':') throw MessageException("Field name too long/no colon found");
 		if (ch != eof) ch = buf.sbumpc(); // ':'
 		while (ch != eof && Poco::Ascii::isSpace(ch) && ch != '\r' && ch != '\n') ch = buf.sbumpc();
-		while (ch != eof && ch != '\r' && ch != '\n' && value.length() < _valueLengthLimit) { value += ch; ch = buf.sbumpc(); }
+		while (ch != eof && ch != '\r' && ch != '\n' && value.length() < MAX_VALUE_LENGTH) { value += ch; ch = buf.sbumpc(); }
 		if (ch == '\r') ch = buf.sbumpc();
 		if (ch == '\n')
 			ch = buf.sbumpc();
@@ -97,7 +93,7 @@ void MessageHeader::read(std::istream& istr)
 			throw MessageException("Field value too long/no CRLF found");
 		while (ch == ' ' || ch == '\t') // folding
 		{
-			while (ch != eof && ch != '\r' && ch != '\n' && value.length() < _valueLengthLimit) { value += ch; ch = buf.sbumpc(); }
+			while (ch != eof && ch != '\r' && ch != '\n' && value.length() < MAX_VALUE_LENGTH) { value += ch; ch = buf.sbumpc(); }
 			if (ch == '\r') ch = buf.sbumpc();
 			if (ch == '\n')
 				ch = buf.sbumpc();
@@ -108,8 +104,7 @@ void MessageHeader::read(std::istream& istr)
 		add(name, decodeWord(value));
 		++fields;
 	}
-	if (istr.good() && ch != eof)
-		istr.putback(ch);
+	istr.putback(ch);
 }
 
 
@@ -118,38 +113,12 @@ int MessageHeader::getFieldLimit() const
 	return _fieldLimit;
 }
 
-
+	
 void MessageHeader::setFieldLimit(int limit)
 {
 	poco_assert (limit >= 0);
-
+	
 	_fieldLimit = limit;
-}
-
-
-int MessageHeader::getNameLengthLimit() const
-{
-	return _nameLengthLimit;
-}
-
-void MessageHeader::setNameLengthLimit(int limit)
-{
-	poco_assert(limit >= 0);
-
-	_nameLengthLimit = limit;
-}
-
-
-int MessageHeader::getValueLengthLimit() const
-{
-	return _valueLengthLimit;
-}
-
-void MessageHeader::setValueLengthLimit(int limit)
-{
-	poco_assert(limit >= 0);
-
-	_valueLengthLimit = limit;
 }
 
 
@@ -288,7 +257,7 @@ void MessageHeader::quote(const std::string& value, std::string& result, bool al
 }
 
 
-void MessageHeader::decodeRFC2047(const std::string& ins, std::string& outs, const std::string& charset_to)
+void MessageHeader::decodeRFC2047(const std::string& ins, std::string& outs, const std::string& charset_to) 
 {
 	std::string tempout;
 	StringTokenizer tokens(ins, "?");
@@ -299,18 +268,18 @@ void MessageHeader::decodeRFC2047(const std::string& ins, std::string& outs, con
 
 	std::istringstream istr(text);
 
-	if (encoding == "B")
+	if (encoding == "B") 
 	{
 		// Base64 encoding.
 		Base64Decoder decoder(istr);
 		for (char c; decoder.get(c); tempout += c) {}
 	}
-	else if (encoding == "Q")
+	else if (encoding == "Q") 
 	{
-		// Quoted encoding.
-		for (char c; istr.get(c);)
+		// Quoted encoding.				
+		for (char c; istr.get(c);) 
 		{
-			if (c == '_')
+			if (c == '_') 
 			{
 				//RFC 2047  _ is a space.
 				tempout += " ";
@@ -318,11 +287,11 @@ void MessageHeader::decodeRFC2047(const std::string& ins, std::string& outs, con
 			}
 
 			// FIXME: check that we have enought chars-
-			if (c == '=')
+			if (c == '=') 
 			{
 				// The next two chars are hex representation of the complete byte.
 				std::string hex;
-				for (int i = 0; i < 2; i++)
+				for (int i = 0; i < 2; i++) 
 				{
 					istr.get(c);
 					hex += c;
@@ -334,7 +303,7 @@ void MessageHeader::decodeRFC2047(const std::string& ins, std::string& outs, con
 			tempout += c;
 		}
 	}
-	else
+	else 
 	{
 		// Wrong encoding
 		outs = ins;
@@ -342,22 +311,22 @@ void MessageHeader::decodeRFC2047(const std::string& ins, std::string& outs, con
 	}
 
 	// convert to the right charset.
-	if (charset != charset_to)
+	if (charset != charset_to) 
 	{
-		try
+		try 
 		{
 			TextEncoding& enc = TextEncoding::byName(charset);
 			TextEncoding& dec = TextEncoding::byName(charset_to);
 			TextConverter converter(enc, dec);
 			converter.convert(tempout, outs);
 		}
-		catch (...)
+		catch (...) 
 		{
 			// FIXME: Unsuported encoding...
 			outs = tempout;
 		}
 	}
-	else
+	else 
 	{
 		// Not conversion necesary.
 		outs = tempout;
@@ -370,7 +339,7 @@ std::string MessageHeader::decodeWord(const std::string& text, const std::string
 	std::string outs, tmp = text;
 	do {
 		std::string tmp2;
-		// find the begining of the next rfc2047 chunk
+		// find the begining of the next rfc2047 chunk 
 		size_t pos = tmp.find("=?");
 		if (pos == std::string::npos) {
 			// No more found, return

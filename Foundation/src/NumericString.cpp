@@ -13,23 +13,23 @@
 
 
 #include "Poco/Bugcheck.h"
-#include "Poco/NumericString.h"
+
 
 // +++ double conversion +++
-// don't collide with standalone double_conversion library
-#define double_conversion poco_double_conversion
+#define double_conversion poco_double_conversion	// don't collide with standalone double_conversion library
+#define UNREACHABLE poco_bugcheck
 #define UNIMPLEMENTED poco_bugcheck
-#include "double-conversion.h"
+#include "diy-fp.cc"
 #include "cached-powers.cc"
 #include "bignum-dtoa.cc"
 #include "bignum.cc"
 #include "fast-dtoa.cc"
 #include "fixed-dtoa.cc"
 #include "strtod.cc"
-#include "double-to-string.cc"
-#include "string-to-double.cc"
+#include "double-conversion.cc"
 // --- double conversion ---
 
+#include "Poco/NumericString.h"
 poco_static_assert(POCO_MAX_FLT_STRING_LEN == double_conversion::kMaxSignificantDecimalDigits);
 #include "Poco/String.h"
 #include <memory>
@@ -51,7 +51,7 @@ void pad(std::string& str, int precision, int width, char prefix = ' ', char dec
 	std::string::size_type decSepPos = str.find(decSep);
 	if (decSepPos == std::string::npos)
 	{
-		str.append(1, decSep);
+		str.append(1, '.');
 		decSepPos = str.size() - 1;
 	}
 

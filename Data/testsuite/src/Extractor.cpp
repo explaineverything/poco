@@ -18,8 +18,7 @@ namespace Data {
 namespace Test {
 
 
-Extractor::Extractor(Poco::TextEncoding::Ptr pDBEncoding):
-	AbstractExtractor(pDBEncoding)
+Extractor::Extractor()
 {
 }
 
@@ -131,10 +130,7 @@ bool Extractor::extract(std::size_t pos, char& val)
 
 bool Extractor::extract(std::size_t pos, std::string& val)
 {
-	if (!transcodeRequired())
-		val = _stringValue;
-	else
-		transcode(_stringValue, val);
+	val = "";
 	return true;
 }
 
@@ -170,13 +166,8 @@ bool Extractor::extract(std::size_t pos, Poco::Data::Time& val)
 }
 
 
+
 bool Extractor::extract(std::size_t pos, Poco::DateTime& val)
-{
-	return true;
-}
-
-
-bool Extractor::extract(std::size_t pos, Poco::UUID& val)
 {
 	return true;
 }

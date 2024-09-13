@@ -16,7 +16,6 @@
 #include "Poco/Crypto/ECDSADigestEngine.h"
 #include "Poco/Crypto/CryptoException.h"
 #include <openssl/ecdsa.h>
-#include <openssl/bn.h>
 
 
 namespace Poco {

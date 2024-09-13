@@ -23,8 +23,7 @@ using Poco::Net::SocketAddress;
 EchoServer::EchoServer():
 	_socket(SocketAddress()),
 	_thread("EchoServer"),
-	_stop(false),
-	_done(false)
+	_stop(false)
 {
 	_thread.start(*this);
 	_ready.wait();
@@ -34,8 +33,7 @@ EchoServer::EchoServer():
 EchoServer::EchoServer(const Poco::Net::SocketAddress& address):
 	_socket(address),
 	_thread("EchoServer"),
-	_stop(false),
-	_done(false)
+	_stop(false)
 {
 	_thread.start(*this);
 	_ready.wait();
@@ -80,18 +78,5 @@ void EchoServer::run()
 			}
 		}
 	}
-	_done = true;
-}
-
-
-void EchoServer::stop()
-{
-	_stop = true;
-}
-
-
-bool EchoServer::done()
-{
-	return _done;
 }
 

@@ -1,0 +1,9 @@
+include $(POCO_BASE)/build/config/ee-openssl
+
+POCO_TARGET_OSNAME = ios-simulator
+POCO_TARGET_OSARCH = x86_64
+
+IPHONE_SDK         = iPhoneSimulator
+APPLE_TARGET       = $(POCO_TARGET_OSARCH)-apple-ios11.4-simulator
+
+include $(POCO_BASE)/build/config/iPhone

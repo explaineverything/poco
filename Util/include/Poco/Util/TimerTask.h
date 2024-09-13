@@ -23,7 +23,6 @@
 #include "Poco/RefCountedObject.h"
 #include "Poco/AutoPtr.h"
 #include "Poco/Timestamp.h"
-#include "Poco/Mutex.h"
 
 
 namespace Poco {
@@ -63,9 +62,6 @@ public:
 		///
 		/// Returns 0 if the timer has never been executed.
 
-	void updateLastExecution();
-		/// Updates the last execution of the timer task.
-
 protected:
 	~TimerTask();
 		/// Destroys the TimerTask.
@@ -75,8 +71,9 @@ private:
 	TimerTask& operator = (const TimerTask&);
 
 	Poco::Timestamp _lastExecution;
-	std::atomic<bool> _isCancelled;
-	mutable FastMutex _mutex;
+	bool _isCancelled;
+
+	friend class TaskNotification;
 };
 
 
@@ -117,15 +114,7 @@ inline bool TimerTask::isCancelled() const
 
 inline Poco::Timestamp TimerTask::lastExecution() const
 {
-	FastMutex::ScopedLock l(_mutex);
 	return _lastExecution;
-}
-
-
-inline void TimerTask::updateLastExecution()
-{
-	FastMutex::ScopedLock l(_mutex);
-	_lastExecution.update();
 }
 
 

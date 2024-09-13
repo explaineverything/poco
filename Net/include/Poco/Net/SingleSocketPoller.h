@@ -30,7 +30,7 @@ namespace Net {
 
 template <std::size_t S = POCO_UDP_BUF_SIZE>
 class SingleSocketPoller
-	/// SingleSocketPoller, as its name indicates, repeatedly polls a single
+	/// SinlgeSocketPoller, as its name indicates, repeatedly polls a single
 	/// socket for readability; if the socket is readable, the reading action
 	/// is delegated to the reader.
 {

@@ -62,8 +62,6 @@ void Stringifier::stringify(const Var& any, std::ostream& out, unsigned int inde
 	else if (any.isNumeric() || any.isBoolean())
 	{
 		std::string value = any.convert<std::string>();
-		if ((Poco::icompare(value, "nan") == 0) ||
-			(Poco::icompare(value, "inf") == 0)) value = "null";
 		if (any.type() == typeid(char)) formatString(value, out, options);
 		else out << value;
 	}

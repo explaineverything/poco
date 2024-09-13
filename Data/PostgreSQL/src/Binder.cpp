@@ -176,13 +176,6 @@ void Binder::bind(std::size_t pos, const Time& val, Direction dir)
 }
 
 
-void Binder::bind(std::size_t pos, const UUID& val, Direction dir)
-{
-	poco_assert(dir == PD_IN);
-	realBind(pos, Poco::Data::MetaColumn::FDT_UUID, &val, sizeof(UUID));
-}
-
-
 void Binder::bind(std::size_t pos, const NullData&, Direction dir)
 {
 	poco_assert(dir == PD_IN);
@@ -205,8 +198,8 @@ Binder::bindVector() const
 
 void Binder::updateBindVectorToCurrentValues()
 {
-	InputParameterVector::iterator itr    = _bindVector.begin();
-	InputParameterVector::iterator itrEnd = _bindVector.end();
+	InputParameterVector::iterator itr		= _bindVector.begin();
+	InputParameterVector::iterator itrEnd	= _bindVector.end();
 
 	for (; itr != itrEnd; ++itr)
 	{
@@ -300,14 +293,6 @@ void Binder::updateBindVectorToCurrentValues()
 				const Poco::Data::CLOB& clob = * static_cast<const Poco::Data::CLOB*>(itr->pData());
 				itr->setNonStringVersionRepresentation(static_cast<const void*> (clob.rawContent()), clob.size());
 			}
-			break;
-
-		case Poco::Data::MetaColumn::FDT_UUID:
-			{
-				const Poco::UUID& uuid = * static_cast<const Poco::UUID*>(itr->pData());
-				itr->setStringVersionRepresentation(uuid.toString());
-			}
-			break;
 
 		case Poco::Data::MetaColumn::FDT_UNKNOWN:
 		default:

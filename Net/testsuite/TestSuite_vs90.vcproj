@@ -1051,15 +1051,7 @@
 					>
 				</File>
 				<File
-					RelativePath=".\src\SocketConnectorTest.h"
-					>
-				</File>
-				<File
 					RelativePath=".\src\SocketReactorTest.h"
-					>
-				</File>
-				<File
-					RelativePath=".\src\SocketProactorTest.h"
 					>
 				</File>
 			</Filter>
@@ -1071,15 +1063,7 @@
 					>
 				</File>
 				<File
-					RelativePath=".\src\SocketConnectorTest.cpp"
-					>
-				</File>
-				<File
 					RelativePath=".\src\SocketReactorTest.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\src\SocketProactorTest.cpp"
 					>
 				</File>
 			</Filter>

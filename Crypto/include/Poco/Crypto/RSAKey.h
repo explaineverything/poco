@@ -31,7 +31,6 @@ class X509Certificate;
 class PKCS12Container;
 
 
-//@ deprecated
 class Crypto_API RSAKey: public KeyPair
 	/// This class stores an RSA key pair, consisting
 	/// of private and public key. Storage of the private
@@ -57,7 +56,7 @@ public:
 	};
 
 	RSAKey(const EVPPKey& key);
-		/// Constructs RSAKey by extracting the RSA key.
+		/// Constructs ECKeyImpl by extracting the EC key.
 
 	RSAKey(const X509Certificate& cert);
 		/// Extracts the RSA public key from the given certificate.

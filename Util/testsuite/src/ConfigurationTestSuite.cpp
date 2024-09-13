@@ -11,7 +11,6 @@
 #include "ConfigurationTestSuite.h"
 #include "AbstractConfigurationTest.h"
 #include "ConfigurationViewTest.h"
-#include "LocalConfigurationViewTest.h"
 #include "ConfigurationMapperTest.h"
 #include "MapConfigurationTest.h"
 #include "LayeredConfigurationTest.h"
@@ -29,7 +28,6 @@ CppUnit::Test* ConfigurationTestSuite::suite()
 	CppUnit::TestSuite* pSuite = new CppUnit::TestSuite("ConfigurationTestSuite");
 
 	pSuite->addTest(ConfigurationViewTest::suite());
-	pSuite->addTest(LocalConfigurationViewTest::suite());
 	pSuite->addTest(ConfigurationMapperTest::suite());
 	pSuite->addTest(MapConfigurationTest::suite());
 	pSuite->addTest(LayeredConfigurationTest::suite());

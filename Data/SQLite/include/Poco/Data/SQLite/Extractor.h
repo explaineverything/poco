@@ -116,9 +116,6 @@ public:
 	bool extract(std::size_t pos, Poco::DateTime& val);
 		/// Extracts a DateTime.
 
-	bool extract(std::size_t pos, Poco::UUID& val);
-		/// Extracts a Time.
-
 	bool extract(std::size_t pos, Poco::Any& val);
 		/// Extracts an Any.
 
@@ -265,13 +262,6 @@ private:
 			DateTime dt;
 			ret = extract(pos, dt);
 			val = dt;
-			break;
-		}
-		case MetaColumn::FDT_UUID:
-		{
-			UUID uuid;
-			ret = extract(pos, uuid);
-			val = uuid;
 			break;
 		}
 		default:

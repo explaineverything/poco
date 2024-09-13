@@ -84,7 +84,7 @@ public:
 
 	Nullable(C&& value):
 		/// Creates a Nullable by moving the given value.
-		_value(std::forward<C>(value)),
+		_value(value),
 		_isNull(false),
 		_null()
 	{
@@ -177,7 +177,7 @@ public:
 		return *this;
 	}
 
-	void swap(Nullable& other) noexcept
+	void swap(Nullable& other)
 		/// Swaps this Nullable with other.
 	{
 		std::swap(_value, other._value);
@@ -310,7 +310,7 @@ private:
 
 
 template <typename C>
-inline void swap(Nullable<C>& n1, Nullable<C>& n2) noexcept
+inline void swap(Nullable<C>& n1, Nullable<C>& n2)
 {
 	n1.swap(n2);
 }
