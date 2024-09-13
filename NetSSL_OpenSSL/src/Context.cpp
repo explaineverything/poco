@@ -25,6 +25,52 @@
 #include <openssl/ssl.h>
 #include <openssl/x509v3.h>
 
+// INFO: Fix to build with latest version of WebRTC (M127) 
+#if defined(__ANDROID__)
+#if !defined(OPENSSL_THREADS)
+typedef struct crypto_mutex_st {
+  char padding;  // Empty structs have different sizes in C and C++.
+} CRYPTO_MUTEX;
+#elif defined(OPENSSL_WINDOWS)
+// CRYPTO_MUTEX can appear in public header files so we really don't want to
+// pull in windows.h. It's statically asserted that this structure is large
+// enough to contain a Windows SRWLOCK by thread_win.c.
+typedef union crypto_mutex_st {
+  void *handle;
+} CRYPTO_MUTEX;
+#elif defined(__MACH__) && defined(__APPLE__)
+typedef pthread_rwlock_t CRYPTO_MUTEX;
+#else
+// It is reasonable to include pthread.h on non-Windows systems, however the
+// |pthread_rwlock_t| that we need is hidden under feature flags, and we can't
+// ensure that we'll be able to get it. It's statically asserted that this
+// structure is large enough to contain a |pthread_rwlock_t| by
+// thread_pthread.c.
+typedef union crypto_mutex_st {
+  double alignment;
+  uint8_t padding[3*sizeof(int) + 5*sizeof(unsigned) + 16 + 8];
+} CRYPTO_MUTEX;
+#endif
+
+struct dh_st {
+  BIGNUM *p;
+  BIGNUM *g;
+  BIGNUM *q;
+  BIGNUM *pub_key;   // g^x mod p
+  BIGNUM *priv_key;  // x
+
+  // priv_length contains the length, in bits, of the private value. If zero,
+  // the private value will be the same length as |p|.
+  unsigned priv_length;
+
+  CRYPTO_MUTEX method_mont_p_lock;
+  BN_MONT_CTX *method_mont_p;
+
+  int flags;
+  CRYPTO_refcount_t references;
+};
+#endif
+
 
 namespace Poco {
 namespace Net {
