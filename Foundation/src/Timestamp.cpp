@@ -192,7 +192,7 @@ Timestamp& Timestamp::operator = (TimeVal tv)
 }
 
 
-void Timestamp::swap(Timestamp& timestamp) noexcept
+void Timestamp::swap(Timestamp& timestamp)
 {
 	std::swap(_ts, timestamp._ts);
 }

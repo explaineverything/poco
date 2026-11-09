@@ -21,7 +21,9 @@
 #include "Poco/StreamCopier.h"
 #include <sstream>
 #include <openssl/evp.h>
+#if OPENSSL_VERSION_NUMBER >= 0x00908000L
 #include <openssl/bn.h>
+#endif
 
 
 namespace Poco {
@@ -76,8 +78,8 @@ ECKeyImpl::ECKeyImpl(int curve):
 }
 
 
-ECKeyImpl::ECKeyImpl(const std::string& publicKeyFile,
-	const std::string& privateKeyFile,
+ECKeyImpl::ECKeyImpl(const std::string& publicKeyFile, 
+	const std::string& privateKeyFile, 
 	const std::string& privateKeyPassphrase): KeyPairImpl("ec", KT_EC_IMPL), _pEC(0)
 {
 	if (EVPPKey::loadKey(&_pEC, PEM_read_PrivateKey, EVP_PKEY_get1_EC_KEY, privateKeyFile, privateKeyPassphrase))

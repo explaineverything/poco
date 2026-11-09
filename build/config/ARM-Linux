@@ -12,7 +12,6 @@ LINKMODE           ?= SHARED
 TOOL               ?= arm-linux
 POCO_TARGET_OSNAME  = Linux
 POCO_TARGET_OSARCH ?= armv7l
-ARCHFLAGS          ?=
 
 #
 # Define Tools
@@ -40,10 +39,10 @@ SHAREDLIBLINKEXT = .so
 #
 # Compiler and Linker Flags
 #
-CFLAGS          = -std=c11 $(ARCHFLAGS)
+CFLAGS          = -std=c99
 CFLAGS32        =
 CFLAGS64        =
-CXXFLAGS        = -std=c++14 -Wall -Wno-sign-compare -Wno-psabi $(ARCHFLAGS)
+CXXFLAGS        = -Wall -Wno-sign-compare
 CXXFLAGS32      =
 CXXFLAGS64      =
 LINKFLAGS       =

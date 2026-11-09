@@ -31,7 +31,6 @@ public:
 	void testAuthenticationParamsMultipleHeaders();
 	void testDigestCredentials();
 	void testDigestCredentialsQoP();
-	void testDigestCredentialsQoPSHA256();
 	void testCredentialsBasic();
 	void testProxyCredentialsBasic();
 	void testCredentialsDigest();
@@ -40,8 +39,6 @@ public:
 	void testExtractCredentials();
 	void testVerifyAuthInfo();
 	void testVerifyAuthInfoQoP();
-	void testVerifyAuthInfoQoPSHA256();
-	void testIsAlgorithmSupported();
 
 	void setUp();
 	void tearDown();

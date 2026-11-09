@@ -21,7 +21,6 @@
 #include "Poco/Foundation.h"
 #include "Poco/Runnable.h"
 #include "Poco/Thread.h"
-#include "Poco/Event.h"
 #include "Poco/ActiveStarter.h"
 #include "Poco/ActiveRunnable.h"
 #include "Poco/NotificationQueue.h"
@@ -36,7 +35,7 @@ class Foundation_API ActiveDispatcher: protected Runnable
 	///
 	/// An active object, which is an ordinary object
 	/// containing ActiveMethod members, executes all
-	/// active methods in their own thread.
+	/// active methods in their own thread. 
 	/// This behavior does not fit the "classic"
 	/// definition of an active object, which serializes
 	/// the execution of active methods (in other words,
@@ -45,7 +44,7 @@ class Foundation_API ActiveDispatcher: protected Runnable
 	///
 	/// Using this class as a base class, the serializing
 	/// behavior for active objects can be implemented.
-	///
+	/// 
 	/// The following example shows how this is done:
 	///
 	///     class ActiveObject: public ActiveDispatcher
@@ -87,7 +86,7 @@ public:
 
 	void cancel();
 		/// Cancels all queued methods.
-
+		
 protected:
 	void run();
 	void stop();

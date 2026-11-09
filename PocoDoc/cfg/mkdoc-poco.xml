@@ -47,8 +47,7 @@
 		<charset>utf-8</charset>
 		<software>POCO C++ Libraries</software>
 		<company>Applied Informatics Software Engineering GmbH and Contributors</company>
-		<companyURI>https://pocoproject.org/
-</companyURI>
+		<companyURI>http://pocoproject.org/</companyURI>
 	</PocoDoc>
 	<Translations>
 		<EN>
@@ -104,5 +103,5 @@
 				<pattern>%s: [%p] %t</pattern>
 			</c1>
 		</channels>
-	</logging>
+	</logging>	
 </AppConfig>

@@ -26,7 +26,6 @@ SessionImpl::SessionImpl(const std::string& init, std::size_t timeout):
 	addFeature("f1", &SessionImpl::setF, &SessionImpl::getF);
 	addFeature("f2", 0, &SessionImpl::getF);
 	addFeature("f3", &SessionImpl::setF, 0);
-	addFeature("throwOnHasNext", &SessionImpl::setThrowOnHasNext, &SessionImpl::getThrowOnHasNext);
 	addFeature("connected", &SessionImpl::setConnected, &SessionImpl::getConnected);
 	addProperty("p1", &SessionImpl::setP, &SessionImpl::getP);
 	addProperty("p2", 0, &SessionImpl::getP);
@@ -74,7 +73,7 @@ std::size_t SessionImpl::getConnectionTimeout() const
 
 StatementImpl::Ptr SessionImpl::createStatementImpl()
 {
-	return new TestStatementImpl(*this, _throwOnHasNext);
+	return new TestStatementImpl(*this);
 }
 
 
@@ -140,13 +139,13 @@ bool SessionImpl::getConnected(const std::string& name) const
 }
 
 
-void SessionImpl::setConnected(const std::string&, bool value)
+void SessionImpl::setConnected(const std::string& name, bool value)
 {
 	_connected = value;
 }
 
 
-void SessionImpl::setF(const std::string&, bool value)
+void SessionImpl::setF(const std::string& name, bool value)
 {
 	_f = value;
 }
@@ -157,17 +156,6 @@ bool SessionImpl::getF(const std::string& name) const
 	return _f;
 }
 
-
-void SessionImpl::setThrowOnHasNext(const std::string&, bool value)
-{
-	_throwOnHasNext = value;
-}
-
-
-bool SessionImpl::getThrowOnHasNext(const std::string& name) const
-{
-	return _throwOnHasNext;
-}
 
 void SessionImpl::setP(const std::string& name, const Poco::Any& value)
 {

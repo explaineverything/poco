@@ -34,21 +34,6 @@ class Buffer
 	///
 	/// This class is useful everywhere where a temporary buffer
 	/// is needed.
-	///
-	/// Note: A Buffer has both a size and a capacity, similar to
-	/// std::vector and std::string. However, upon creation of the
-	/// Buffer, the size always equals the capacity (provided via the
-	/// length argument of the constructor), as the Buffer is meant
-	/// to be filled by directly writing to its contents,
-	/// i.e., by passing the pointer to the first element
-	/// of the buffer obtained via begin() to a function expecting
-	/// a pointer to a buffer.
-	///
-	/// Therefore, calling append() on a newly created Buffer will
-	/// always expand the buffer size and capacity.
-	/// If you need to create a Buffer and want to write data to it
-	/// by calling append(), the correct steps are to first create
-	/// the Buffer, then call resize(0), and then call append().
 {
 public:
 	Buffer(std::size_t length):
@@ -174,7 +159,7 @@ public:
 		if (newCapacity > _capacity)
 		{
 			T* ptr = new T[newCapacity];
-			if (preserveContent && _ptr)
+			if (preserveContent)
 			{
 				std::memcpy(ptr, _ptr, _used * sizeof(T));
 			}
@@ -206,7 +191,7 @@ public:
 			if (newCapacity > 0)
 			{
 				ptr = new T[newCapacity];
-				if (preserveContent && _ptr)
+				if (preserveContent)
 				{
 					std::size_t newSz = _used < newCapacity ? _used : newCapacity;
 					std::memcpy(ptr, _ptr, newSz * sizeof(T));
@@ -263,7 +248,7 @@ public:
 		return _capacity * sizeof(T);
 	}
 
-	void swap(Buffer& other) noexcept
+	void swap(Buffer& other)
 	/// Swaps the buffer with another one.
 	{
 		using std::swap;
@@ -281,11 +266,10 @@ public:
 		{
 			if (_used == other._used)
 			{
-				if (_ptr && other._ptr && std::memcmp(_ptr, other._ptr, _used * sizeof(T)) == 0)
+				if (std::memcmp(_ptr, other._ptr, _used * sizeof(T)) == 0)
 				{
 					return true;
 				}
-				else return _used == 0;
 			}
 			return false;
 		}

@@ -643,10 +643,6 @@
 					RelativePath=".\include\Poco\Net\StreamSocketImpl.h"
 					>
 				</File>
-				<File
-					RelativePath=".\src\wepoll.h"
-					>
-				</File>
 			</Filter>
 			<Filter
 				Name="Source Files"
@@ -705,10 +701,6 @@
 				</File>
 				<File
 					RelativePath=".\src\StreamSocketImpl.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\src\wepoll.c"
 					>
 				</File>
 			</Filter>
@@ -1259,10 +1251,6 @@
 					RelativePath=".\include\Poco\Net\SocketReactor.h"
 					>
 				</File>
-				<File
-					RelativePath=".\include\Poco\Net\SocketProactor.h"
-					>
-				</File>
 			</Filter>
 			<Filter
 				Name="Source Files"
@@ -1277,10 +1265,6 @@
 				</File>
 				<File
 					RelativePath=".\src\SocketReactor.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\src\SocketProactor.cpp"
 					>
 				</File>
 			</Filter>

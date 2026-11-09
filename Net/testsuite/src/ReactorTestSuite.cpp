@@ -10,7 +10,6 @@
 
 #include "ReactorTestSuite.h"
 #include "SocketReactorTest.h"
-#include "SocketConnectorTest.h"
 
 
 CppUnit::Test* ReactorTestSuite::suite()
@@ -18,7 +17,6 @@ CppUnit::Test* ReactorTestSuite::suite()
 	CppUnit::TestSuite* pSuite = new CppUnit::TestSuite("ReactorTestSuite");
 
 	pSuite->addTest(SocketReactorTest::suite());
-	pSuite->addTest(SocketConnectorTest::suite());
 
 	return pSuite;
 }

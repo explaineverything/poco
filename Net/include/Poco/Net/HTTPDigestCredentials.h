@@ -120,9 +120,6 @@ public:
 		/// and HTTPAuthenticationParams by recomputing the response and comparing
 		/// it with what's in the request.
 
-	bool isAlgorithmSupported(const std::string& algorithm) const;
-		/// Check if digest algorithm is supported
-
 	static std::string createNonce();
 		/// Creates a random nonce string.
 
@@ -136,19 +133,7 @@ private:
 	void updateAuthParams(const HTTPRequest& request);
 	int updateNonceCounter(const std::string& nonce);
 
-	class DigestEngineProvider;
-	
-	static const std::string MD_5_ALGORITHM;
-	static const std::string MD_5_SESS_ALGORITHM;
-	static const std::string SHA_ALGORITHM;
-	static const std::string SHA_SESS_ALGORITHM;
-	static const std::string SHA_256_ALGORITHM;
-	static const std::string SHA_256_SESS_ALGORITHM;
-	static const std::string SHA_512_256_ALGORITHM;
-	static const std::string SHA_512_256_SESS_ALGORITHM;
-	static const std::string SHA_512_ALGORITHM;
-	static const std::string SHA_512_SESS_ALGORITHM;
-	static const std::vector<std::string> SUPPORTED_ALGORITHMS;
+	static const std::string DEFAULT_ALGORITHM;
 	static const std::string DEFAULT_QOP;
 	static const std::string NONCE_PARAM;
 	static const std::string REALM_PARAM;

@@ -30,7 +30,6 @@
 #include "Poco/Data/SQLite/SQLiteException.h"
 #include "Poco/Tuple.h"
 #include "Poco/Any.h"
-#include "Poco/UUIDGenerator.h"
 #include "Poco/SharedPtr.h"
 #include "Poco/DynamicAny.h"
 #include "Poco/DateTime.h"
@@ -55,7 +54,6 @@ using Poco::Data::SQLChannel;
 using Poco::Data::LimitException;
 using Poco::Data::ConnectionFailedException;
 using Poco::Data::CLOB;
-using Poco::Data::BLOB;
 using Poco::Data::Date;
 using Poco::Data::Time;
 using Poco::Data::Transaction;
@@ -464,7 +462,7 @@ void SQLiteTest::testInsertCharPointer()
 
 	pc = (const char*) std::calloc(9, sizeof(char));
 	poco_check_ptr (pc);
-	std::strncpy((char*) pc, "lastname", 9);
+	std::strncpy((char*) pc, "lastname", 8);
 	Statement stmt = (tmp << "INSERT INTO PERSON VALUES(:ln, :fn, :ad, :age)",
 		bind(pc),
 		bind("firstname"),
@@ -1376,21 +1374,6 @@ void SQLiteTest::testEmptyDB()
 }
 
 
-void SQLiteTest::testNonexistingDB()
-{
-	try
-	{
-		Session tmp (Poco::Data::SQLite::Connector::KEY, "foo/bar/nonexisting.db", 1);
-		fail("non-existing DB must throw");
-	}
-	catch(ConnectionFailedException& ex)
-	{
-		return;
-	}
-	fail("non-existing DB must throw ConnectionFailedException");
-}
-
-
 void SQLiteTest::testCLOB()
 {
 	std::string lastName("lastname");
@@ -1432,49 +1415,6 @@ void SQLiteTest::testCLOB()
 	{
 		poco_assert (*resVec[i].begin() == (char) (0x30 + i));
 	}
-}
-
-
-void SQLiteTest::testBLOB()
-{
-	std::string lastName("lastname");
-	std::string firstName("firstname");
-	std::string address("Address");
-	Session tmp(Poco::Data::SQLite::Connector::KEY, "dummy.db");
-	tmp << "DROP TABLE IF EXISTS Person", now;
-	tmp << "CREATE TABLE IF NOT EXISTS Person (LastName VARCHAR(30), FirstName VARCHAR, Address VARCHAR, Image BLOB)", now;
-
-	struct DataStruct
-	{
-		int i = 0;
-		Poco::Int64 i64 = 1;
-		float f = 2.5;
-		double d = 3.5;
-		char c[16] = {0};
-	};
-
-	DataStruct ds;
-	strcpy(ds.c, "123456789ABCDEF");
-	BLOB img(reinterpret_cast<unsigned char*>(&ds), sizeof(ds));
-	assertTrue(img.size() == sizeof(ds));
-	int count = 0;
-	tmp << "INSERT INTO PERSON VALUES(:ln, :fn, :ad, :img)", use(lastName), use(firstName), use(address), use(img), now;
-	tmp << "SELECT COUNT(*) FROM PERSON", into(count), now;
-	assertTrue(count == 1);
-	BLOB res;
-	assertTrue(res.size() == 0);
-
-	tmp << "SELECT Image FROM Person WHERE LastName == :ln", bind("lastname"), into(res), now;
-	assertTrue(res.size() == img.size());
-	assertTrue(0 == std::memcmp(res.rawContent(), img.rawContent(), sizeof(img)));
-	assertTrue(0 == std::memcmp(res.rawContent(), &ds, sizeof(ds)));
-	DataStruct dsCopy;
-	std::memcpy(&dsCopy, res.rawContent(), sizeof(dsCopy));
-	assertTrue(ds.i == dsCopy.i);
-	assertTrue(ds.i64 == dsCopy.i64);
-	assertTrue(ds.f == dsCopy.f);
-	assertTrue(ds.d == dsCopy.d);
-	assertTrue(std::string(ds.c) == std::string(dsCopy.c));
 }
 
 
@@ -1973,21 +1913,6 @@ void SQLiteTest::testDateTime()
 	assertTrue (rt != t);
 	tmp << "SELECT * FROM DateTimes", into(rt), now;
 	assertTrue (rt == t);
-}
-
-
-void SQLiteTest::testUUID()
-{
-	Session tmp (Poco::Data::SQLite::Connector::KEY, "dummy.db");
-	tmp << "DROP TABLE IF EXISTS Ids", now;
-	tmp << "CREATE TABLE Ids (id0 UUID)", now;
-
-	Poco::UUID uuid = Poco::UUIDGenerator::defaultGenerator().createRandom();
-	tmp << "INSERT INTO Ids VALUES (?)", use(uuid), now;
-
-	Poco::UUID ruuid;
-	tmp << "SELECT * FROM Ids", into(ruuid), now;
-	assertTrue (ruuid == uuid);
 }
 
 
@@ -3220,8 +3145,7 @@ void SQLiteTest::testTransaction()
 	std::string result;
 
 	session.setTransactionIsolation(Session::TRANSACTION_READ_COMMITTED);
-	session.setProperty(Poco::Data::SQLite::Utility::TRANSACTION_TYPE_PROPERTY_KEY,
-		Poco::Data::SQLite::TransactionType::EXCLUSIVE);
+
 	{
 		Transaction trans(session);
 		assertTrue (trans.isActive());
@@ -3243,8 +3167,7 @@ void SQLiteTest::testTransaction()
 	session << "SELECT count(*) FROM Person", into(count), now;
 	assertTrue (0 == count);
 	assertTrue (!session.isTransaction());
-	session.setProperty(Utility::TRANSACTION_TYPE_PROPERTY_KEY,
-		Poco::Data::SQLite::TransactionType::IMMEDIATE);
+
 	{
 		Transaction trans(session);
 		session << "INSERT INTO Person VALUES (?,?,?,?)", use(lastNames), use(firstNames), use(addresses), use(ages), now;
@@ -3453,19 +3376,6 @@ void SQLiteTest::testIllegalFilePath()
 	}
 }
 
-void SQLiteTest::testTransactionTypeProperty() 
-{
-	try {
-		using namespace Poco::Data::SQLite;
-
-		Session tmp(Connector::KEY, "dummy.db");
-		tmp.setProperty(Utility::TRANSACTION_TYPE_PROPERTY_KEY, TransactionType::EXCLUSIVE);
-		Poco::Any property = tmp.getProperty(Utility::TRANSACTION_TYPE_PROPERTY_KEY);
-		TransactionType value = Poco::RefAnyCast<TransactionType>(property);
-		assertTrue(value == TransactionType::EXCLUSIVE);
-	} catch (Poco::Exception&) {}
-}
-
 
 void SQLiteTest::setUp()
 {
@@ -3521,9 +3431,7 @@ CppUnit::Test* SQLiteTest::suite()
 	CppUnit_addTest(pSuite, SQLiteTest, testIllegalRange);
 	CppUnit_addTest(pSuite, SQLiteTest, testSingleSelect);
 	CppUnit_addTest(pSuite, SQLiteTest, testEmptyDB);
-	CppUnit_addTest(pSuite, SQLiteTest, testNonexistingDB);
 	CppUnit_addTest(pSuite, SQLiteTest, testCLOB);
-	CppUnit_addTest(pSuite, SQLiteTest, testBLOB);
 	CppUnit_addTest(pSuite, SQLiteTest, testTuple10);
 	CppUnit_addTest(pSuite, SQLiteTest, testTupleVector10);
 	CppUnit_addTest(pSuite, SQLiteTest, testTuple9);
@@ -3545,7 +3453,6 @@ CppUnit::Test* SQLiteTest::suite()
 	CppUnit_addTest(pSuite, SQLiteTest, testTuple1);
 	CppUnit_addTest(pSuite, SQLiteTest, testTupleVector1);
 	CppUnit_addTest(pSuite, SQLiteTest, testDateTime);
-	CppUnit_addTest(pSuite, SQLiteTest, testUUID);
 	CppUnit_addTest(pSuite, SQLiteTest, testInternalExtraction);
 	CppUnit_addTest(pSuite, SQLiteTest, testPrimaryKeyConstraint);
 	CppUnit_addTest(pSuite, SQLiteTest, testNullable);
@@ -3571,7 +3478,6 @@ CppUnit::Test* SQLiteTest::suite()
 	CppUnit_addTest(pSuite, SQLiteTest, testTransactor);
 	CppUnit_addTest(pSuite, SQLiteTest, testFTS3);
 	CppUnit_addTest(pSuite, SQLiteTest, testIllegalFilePath);
-	CppUnit_addTest(pSuite, SQLiteTest, testTransactionTypeProperty);
 
 	return pSuite;
 }

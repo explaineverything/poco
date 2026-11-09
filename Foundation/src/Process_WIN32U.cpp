@@ -411,17 +411,9 @@ bool ProcessImpl::isRunningImpl(PIDImpl pid)
 {
 	HANDLE hProc = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, pid);
 	bool result = true;
-	if (hProc)
-	{
-		DWORD exitCode;
-		BOOL rc = GetExitCodeProcess(hProc, &exitCode);
-		if (!rc || exitCode != STILL_ACTIVE) result = false;
-		CloseHandle(hProc);
-	}
-	else
-	{
-		result = false;
-	}
+	DWORD exitCode;
+	BOOL rc = GetExitCodeProcess(hProc, &exitCode);
+	if (!rc || exitCode != STILL_ACTIVE) result = false;
 	return result;
 }
 

@@ -25,12 +25,12 @@ HostEntry::HostEntry()
 {
 }
 
-
+	
 HostEntry::HostEntry(struct hostent* entry)
 {
 	poco_check_ptr (entry);
-
-	_name = entry->h_name;
+	
+	_name = entry->h_name;	
 	char** alias = entry->h_aliases;
 	if (alias)
 	{
@@ -40,8 +40,6 @@ HostEntry::HostEntry(struct hostent* entry)
 			++alias;
 		}
 	}
-	removeDuplicates(_aliases);
-
 	char** address = entry->h_addr_list;
 	if (address)
 	{
@@ -51,7 +49,6 @@ HostEntry::HostEntry(struct hostent* entry)
 			++address;
 		}
 	}
-	removeDuplicates(_addresses);
 }
 
 
@@ -61,7 +58,7 @@ HostEntry::HostEntry(struct hostent* entry)
 HostEntry::HostEntry(struct addrinfo* ainfo)
 {
 	poco_check_ptr (ainfo);
-
+	
 	for (struct addrinfo* ai = ainfo; ai; ai = ai->ai_next)
 	{
 		if (ai->ai_canonname)
@@ -83,7 +80,6 @@ HostEntry::HostEntry(struct addrinfo* ainfo)
 			}
 		}
 	}
-	removeDuplicates(_addresses);
 }
 
 
@@ -123,7 +119,7 @@ HostEntry& HostEntry::operator = (const HostEntry& entry)
 }
 
 
-void HostEntry::swap(HostEntry& hostEntry) noexcept
+void HostEntry::swap(HostEntry& hostEntry)
 {
 	std::swap(_name, hostEntry._name);
 	std::swap(_aliases, hostEntry._aliases);

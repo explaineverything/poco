@@ -28,11 +28,10 @@ namespace Poco {
 namespace Net {
 
 
-FTPClientSession::FTPClientSession(Poco::UInt16 activeDataPort):
+FTPClientSession::FTPClientSession():
 	_pControlSocket(0),
 	_pDataStream(0),
 	_port(FTP_PORT),
-	_activeDataPort(activeDataPort),
 	_passiveMode(true),
 	_fileType(TYPE_BINARY),
 	_supports1738(true),
@@ -43,14 +42,11 @@ FTPClientSession::FTPClientSession(Poco::UInt16 activeDataPort):
 }
 
 
-FTPClientSession::FTPClientSession(const StreamSocket& socket,
-	bool readWelcomeMessage,
-	Poco::UInt16 activeDataPort):
+FTPClientSession::FTPClientSession(const StreamSocket& socket, bool readWelcomeMessage):
 	_pControlSocket(new DialogSocket(socket)),
 	_pDataStream(0),
 	_host(socket.address().host().toString()),
 	_port(socket.address().port()),
-	_activeDataPort(activeDataPort),
 	_passiveMode(true),
 	_fileType(TYPE_BINARY),
 	_supports1738(true),
@@ -73,13 +69,11 @@ FTPClientSession::FTPClientSession(const StreamSocket& socket,
 FTPClientSession::FTPClientSession(const std::string& host,
 	Poco::UInt16 port,
 	const std::string& username,
-	const std::string& password,
-	Poco::UInt16 activeDataPort):
+	const std::string& password):
 	_pControlSocket(new DialogSocket(SocketAddress(host, port))),
 	_pDataStream(0),
 	_host(host),
 	_port(port),
-	_activeDataPort(activeDataPort),
 	_passiveMode(true),
 	_fileType(TYPE_BINARY),
 	_supports1738(true),
@@ -458,7 +452,7 @@ StreamSocket FTPClientSession::activeDataConnection(const std::string& command, 
 	if (!isOpen())
 		throw FTPException("Connection is closed.");
 
-	ServerSocket server(SocketAddress(_pControlSocket->address().host(), _activeDataPort));
+	ServerSocket server(SocketAddress(_pControlSocket->address().host(), 0));
 	sendPortCommand(server.address());
 	std::string response;
 	int status = sendCommand(command, arg, response);

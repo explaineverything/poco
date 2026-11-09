@@ -239,7 +239,7 @@ public:
 		return assign<Other>(ptr);
 	}
 
-	void swap(SharedPtr& ptr) noexcept
+	void swap(SharedPtr& ptr)
 	{
 		std::swap(_ptr, ptr._ptr);
 		std::swap(_pCounter, ptr._pCounter);
@@ -480,7 +480,7 @@ SharedPtr<T> makeShared(Args&&... args)
 template <typename T>
 SharedPtr<T, ReferenceCounter, ReleaseArrayPolicy<T>> makeSharedArray(std::size_t size)
 {
-	return SharedPtr<T, ReferenceCounter, ReleaseArrayPolicy<T>>(new T[size]);
+	return new SharedPtr<T, ReferenceCounter, ReleaseArrayPolicy<T>>(new T[size]);
 }
 
 

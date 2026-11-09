@@ -541,9 +541,6 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\BinaryExtractor.cpp">
-      <MultiProcessorCompilation>true</MultiProcessorCompilation>
-    </ClCompile>
     <ClCompile Include="src\Binder.cpp">
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
@@ -576,7 +573,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\Poco\Data\PostgreSQL\BinaryExtractor.h"/>
     <ClInclude Include="include\Poco\Data\PostgreSQL\Binder.h"/>
     <ClInclude Include="include\Poco\Data\PostgreSQL\Connector.h"/>
     <ClInclude Include="include\Poco\Data\PostgreSQL\Extractor.h"/>

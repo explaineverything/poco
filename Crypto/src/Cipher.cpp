@@ -39,32 +39,30 @@ Cipher::~Cipher()
 }
 
 
-std::string Cipher::encryptString(const std::string& str, Encoding encoding, bool padding)
+std::string Cipher::encryptString(const std::string& str, Encoding encoding)
 {
 	std::istringstream source(str);
 	std::ostringstream sink;
 
-	encrypt(source, sink, encoding, padding);
+	encrypt(source, sink, encoding);
 
 	return sink.str();
 }
 
 
-std::string Cipher::decryptString(const std::string& str, Encoding encoding, bool padding)
+std::string Cipher::decryptString(const std::string& str, Encoding encoding)
 {
 	std::istringstream source(str);
 	std::ostringstream sink;
 
-	decrypt(source, sink, encoding, padding);
+	decrypt(source, sink, encoding);
 	return sink.str();
 }
 
 
-void Cipher::encrypt(std::istream& source, std::ostream& sink, Encoding encoding, bool padding)
+void Cipher::encrypt(std::istream& source, std::ostream& sink, Encoding encoding)
 {
-	CryptoTransform::Ptr p = createEncryptor();
-	if (!padding) p->setPadding(0);
-	CryptoInputStream encryptor(source, p);
+	CryptoInputStream encryptor(source, createEncryptor());
 
 	switch (encoding)
 	{
@@ -104,11 +102,9 @@ void Cipher::encrypt(std::istream& source, std::ostream& sink, Encoding encoding
 }
 
 
-void Cipher::decrypt(std::istream& source, std::ostream& sink, Encoding encoding, bool padding)
+void Cipher::decrypt(std::istream& source, std::ostream& sink, Encoding encoding)
 {
-	CryptoTransform::Ptr p = createDecryptor();
-	if (!padding) p->setPadding(0);
-	CryptoOutputStream decryptor(sink, p);
+	CryptoOutputStream decryptor(sink, createDecryptor());
 
 	switch (encoding)
 	{

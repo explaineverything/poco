@@ -46,8 +46,8 @@ SessionPoolTest::~SessionPoolTest()
 
 void SessionPoolTest::testSessionPool()
 {
-	SessionPool pool("test", "cs", 1, 4, 2, 10);
-
+	SessionPool pool("test", "cs", 1, 4, 2);
+	
 	pool.setFeature("f1", true);
 	assertTrue (pool.getFeature("f1"));
 	try { pool.getFeature("g1"); fail ("must fail"); }
@@ -61,25 +61,23 @@ void SessionPoolTest::testSessionPool()
 	assertTrue (pool.capacity() == 4);
 	assertTrue (pool.allocated() == 0);
 	assertTrue (pool.idle() == 0);
-	assertTrue (pool.connTimeout() == 10);
 	assertTrue (pool.available() == 4);
 	assertTrue (pool.dead() == 0);
 	assertTrue (pool.allocated() == pool.used() + pool.idle());
 	Session s1(pool.get());
-
+	
 	assertTrue (s1.getFeature("f1"));
 	assertTrue (1 == Poco::AnyCast<int>(s1.getProperty("p1")));
 
 	try { pool.setFeature("f1", true); fail ("must fail"); }
 	catch ( Poco::InvalidAccessException& ) { }
-
+	
 	try { pool.setProperty("p1", 1); fail ("must fail"); }
 	catch ( Poco::InvalidAccessException& ) { }
 
 	assertTrue (pool.capacity() == 4);
 	assertTrue (pool.allocated() == 1);
 	assertTrue (pool.idle() == 0);
-	assertTrue (pool.connTimeout() == 10);
 	assertTrue (pool.available() == 3);
 	assertTrue (pool.dead() == 0);
 	assertTrue (pool.allocated() == pool.used() + pool.idle());
@@ -91,11 +89,10 @@ void SessionPoolTest::testSessionPool()
 	assertTrue (pool.capacity() == 4);
 	assertTrue (pool.allocated() == 2);
 	assertTrue (pool.idle() == 0);
-	assertTrue (pool.connTimeout() == 10);
 	assertTrue (pool.available() == 2);
 	assertTrue (pool.dead() == 0);
 	assertTrue (pool.allocated() == pool.used() + pool.idle());
-
+	
 	{
 		Session s3(pool.get("p1", 2));
 		assertTrue (s3.getFeature("f1"));
@@ -104,7 +101,6 @@ void SessionPoolTest::testSessionPool()
 		assertTrue (pool.capacity() == 4);
 		assertTrue (pool.allocated() == 3);
 		assertTrue (pool.idle() == 0);
-		assertTrue (pool.connTimeout() == 10);
 		assertTrue (pool.available() == 1);
 		assertTrue (pool.dead() == 0);
 		assertTrue (pool.allocated() == pool.used() + pool.idle());
@@ -113,7 +109,6 @@ void SessionPoolTest::testSessionPool()
 	assertTrue (pool.capacity() == 4);
 	assertTrue (pool.allocated() == 3);
 	assertTrue (pool.idle() == 1);
-	assertTrue (pool.connTimeout() == 10);
 	assertTrue (pool.available() == 2);
 	assertTrue (pool.dead() == 0);
 	assertTrue (pool.allocated() == pool.used() + pool.idle());
@@ -125,7 +120,6 @@ void SessionPoolTest::testSessionPool()
 	assertTrue (pool.capacity() == 4);
 	assertTrue (pool.allocated() == 3);
 	assertTrue (pool.idle() == 0);
-	assertTrue (pool.connTimeout() == 10);
 	assertTrue (pool.available() == 1);
 	assertTrue (pool.dead() == 0);
 	assertTrue (pool.allocated() == pool.used() + pool.idle());
@@ -135,23 +129,21 @@ void SessionPoolTest::testSessionPool()
 	assertTrue (pool.capacity() == 4);
 	assertTrue (pool.allocated() == 4);
 	assertTrue (pool.idle() == 0);
-	assertTrue (pool.connTimeout() == 10);
 	assertTrue (pool.available() == 0);
 	assertTrue (pool.dead() == 0);
 	assertTrue (pool.allocated() == pool.used() + pool.idle());
-
+	
 	try
 	{
 		Session s6(pool.get());
 		fail("pool exhausted - must throw");
 	}
 	catch (SessionPoolExhaustedException&) { }
-
+	
 	s5.close();
 	assertTrue (pool.capacity() == 4);
 	assertTrue (pool.allocated() == 4);
 	assertTrue (pool.idle() == 1);
-	assertTrue (pool.connTimeout() == 10);
 	assertTrue (pool.available() == 1);
 	assertTrue (pool.dead() == 0);
 	assertTrue (pool.allocated() == pool.used() + pool.idle());
@@ -167,39 +159,35 @@ void SessionPoolTest::testSessionPool()
 	assertTrue (pool.capacity() == 4);
 	assertTrue (pool.allocated() == 4);
 	assertTrue (pool.idle() == 2);
-	assertTrue (pool.connTimeout() == 10);
 	assertTrue (pool.available() == 2);
 	assertTrue (pool.dead() == 0);
 	assertTrue (pool.allocated() == pool.used() + pool.idle());
-
+	
 	Thread::sleep(5000); // time to clean up idle sessions
-
+	
 	assertTrue (pool.capacity() == 4);
 	assertTrue (pool.allocated() == 2);
 	assertTrue (pool.idle() == 0);
-	assertTrue (pool.connTimeout() == 10);
 	assertTrue (pool.available() == 2);
 	assertTrue (pool.dead() == 0);
 	assertTrue (pool.allocated() == pool.used() + pool.idle());
-
+	
 	Session s6(pool.get());
 
 	assertTrue (pool.capacity() == 4);
 	assertTrue (pool.allocated() == 3);
 	assertTrue (pool.idle() == 0);
-	assertTrue (pool.connTimeout() == 10);
 	assertTrue (pool.available() == 1);
 	assertTrue (pool.dead() == 0);
 	assertTrue (pool.allocated() == pool.used() + pool.idle());
 
 	s6.setFeature("connected", false);
 	assertTrue (pool.dead() == 1);
-
+	
 	s6.close();
 	assertTrue (pool.capacity() == 4);
 	assertTrue (pool.allocated() == 2);
 	assertTrue (pool.idle() == 0);
-	assertTrue (pool.connTimeout() == 10);
 	assertTrue (pool.available() == 2);
 	assertTrue (pool.dead() == 0);
 	assertTrue (pool.allocated() == pool.used() + pool.idle());
@@ -217,7 +205,6 @@ void SessionPoolTest::testSessionPool()
 	assertTrue (pool.capacity() == 4);
 	assertTrue (pool.allocated() == 0);
 	assertTrue (pool.idle() == 0);
-	assertTrue (pool.connTimeout() == 10);
 	assertTrue (pool.available() == 0);
 	assertTrue (pool.dead() == 0);
 	assertTrue (pool.allocated() == pool.used() + pool.idle());

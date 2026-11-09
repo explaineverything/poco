@@ -34,7 +34,6 @@ public:
 	void testPostSmallClose();
 	void testPostLargeClose();
 	void testKeepAlive();
-	void testTrailer();
 	void testProxy();
 	void testProxyAuth();
 	void testBypassProxy();

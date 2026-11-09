@@ -58,21 +58,18 @@ public:
 		TYPE_BINARY /// TYPE I (Image/binary data)
 	};
 
-	FTPClientSession(Poco::UInt16 activeDataPort = 0);
+	FTPClientSession();
 		/// Creates an FTPClientSession.
 		///
 		/// Passive mode will be used for data transfers.
 
-	FTPClientSession(const StreamSocket& socket, bool readWelcomeMessage = true,
-		Poco::UInt16 activeDataPort = 0);
+	FTPClientSession(const StreamSocket& socket, bool readWelcomeMessage = true);
 		/// Creates an FTPClientSession using the given
 		/// connected socket for the control connection.
 		///
 		/// Passive mode will be used for data transfers.
 
-	FTPClientSession(const std::string& host, Poco::UInt16 port = FTP_PORT,
-		const std::string& username = "", const std::string& password = "",
-		Poco::UInt16 activeDataPort = 0);
+	FTPClientSession(const std::string& host, Poco::UInt16 port = FTP_PORT, const std::string& username = "", const std::string& password = "");
 		/// Creates an FTPClientSession using a socket connected
 		/// to the given host and port. If username is supplied,
 		/// login is attempted.
@@ -353,7 +350,6 @@ private:
 
 	std::string _host;
 	Poco::UInt16 _port = FTP_PORT;
-	Poco::UInt16 _activeDataPort = 0;
 	bool _passiveMode = true;
 	FileType _fileType = TYPE_BINARY;
 	bool _supports1738 = true;

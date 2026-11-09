@@ -71,9 +71,7 @@ public:
 	Binder(const StatementHandle& rStmt,
 		std::size_t maxFieldSize,
 		ParameterBinding dataBinding = PB_IMMEDIATE,
-		const TypeInfo* pDataTypes = 0,
-		Poco::TextEncoding::Ptr pFromEncoding = nullptr,
-		Poco::TextEncoding::Ptr pDBEncoding = nullptr);
+		const TypeInfo* pDataTypes = 0);
 		/// Creates the Binder.
 
 	~Binder();
@@ -324,9 +322,6 @@ public:
 	void bind(std::size_t pos, const std::list<DateTime>& val, Direction dir);
 		/// Binds a DateTime list.
 
-	void bind(std::size_t pos, const UUID& val, Direction dir);
-		/// Binds a UUID.
-
 	void bind(std::size_t pos, const NullData& val, Direction dir);
 		/// Binds a null. In-bound only.
 
@@ -372,7 +367,6 @@ private:
 	typedef std::vector<AnyVec>                              AnyVecVec;
 	typedef std::map<char*, std::string*>                    StringMap;
 	typedef std::map<UTF16String::value_type*, UTF16String*> UTF16StringMap;
-	typedef std::map<char*, UUID*>                           UUIDMap;
 	typedef std::map<SQL_DATE_STRUCT*, Date*>                DateMap;
 	typedef std::map<SQL_TIME_STRUCT*, Time*>                TimeMap;
 	typedef std::map<SQL_TIMESTAMP_STRUCT*, DateTime*>       TimestampMap;
@@ -540,7 +534,7 @@ private:
 	}
 
 	template <typename C>
-	void bindImplContainerString(std::size_t pos, const C& valC, Direction dir)
+	void bindImplContainerString(std::size_t pos, const C& val, Direction dir)
 		/// Utility function to bind containers of strings.
 	{
 		if (isOutBound(dir) || !isInBound(dir))
@@ -549,19 +543,7 @@ private:
 		if (PB_IMMEDIATE != _paramBinding)
 			throw InvalidAccessException("Containers can only be bound immediately.");
 
-		const C* pVal = 0;
-		if (!transcodeRequired()) pVal = &valC;
-		else
-		{
-			pVal = new C(valC.size());
-			typename C::const_iterator valIt = valC.begin();
-			typename C::const_iterator valEnd = valC.end();
-			typename C::iterator tcIt = const_cast<C*>(pVal)->begin();
-			for (; valIt != valEnd; ++valIt, ++tcIt)
-				transcode(*valIt, *tcIt);
-		}
-
-		std::size_t length = pVal->size();
+		std::size_t length = val.size();
 
 		if (0 == length)
 			throw InvalidArgumentException("Empty container not allowed.");
@@ -574,7 +556,7 @@ private:
 
 		if (size == _maxFieldSize)
 		{
-			getMinValueSize(*pVal, size);
+			getMinValueSize(val, size);
 			// accomodate for terminating zero
 			if (size != _maxFieldSize) ++size;
 		}
@@ -588,25 +570,20 @@ private:
 		if (_charPtrs.size() <= pos)
 			_charPtrs.resize(pos + 1, 0);
 
-		_charPtrs[pos] = (char*) std::calloc(pVal->size() * size, sizeof(char));
+		_charPtrs[pos] = (char*) std::calloc(val.size() * size, sizeof(char));
 
-		std::string typeID = typeid(*pVal).name();
 		std::size_t strSize;
 		std::size_t offset = 0;
-		typename C::const_iterator it = pVal->begin();
-		typename C::const_iterator end = pVal->end();
+		typename C::const_iterator it = val.begin();
+		typename C::const_iterator end = val.end();
 		for (; it != end; ++it)
 		{
 			strSize = it->size();
 			if (strSize > size)
-			{
-				if (transcodeRequired()) delete pVal;
-				throw LengthExceededException(Poco::format("SQLBindParameter(%s)", typeID));
-			}
+				throw LengthExceededException("SQLBindParameter(std::vector<std::string>)");
 			std::memcpy(_charPtrs[pos] + offset, it->c_str(), strSize);
 			offset += size;
 		}
-		if (transcodeRequired()) delete pVal;
 
 		if (Utility::isError(SQLBindParameter(_rStmt,
 			(SQLUSMALLINT) pos + 1,
@@ -619,7 +596,7 @@ private:
 			(SQLINTEGER) size,
 			&(*_vecLengthIndicator[pos])[0])))
 		{
-			throw StatementException(_rStmt, Poco::format("SQLBindParameter(%s)", typeID));
+			throw StatementException(_rStmt, "SQLBindParameter(std::vector<std::string>)");
 		}
 	}
 
@@ -1021,7 +998,6 @@ private:
 	TimestampMap     _timestamps;
 	StringMap        _strings;
 	UTF16StringMap   _utf16Strings;
-	UUIDMap          _uuids;
 
 	DateVecVec       _dateVecVec;
 	TimeVecVec       _timeVecVec;

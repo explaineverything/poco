@@ -45,10 +45,7 @@ namespace
 {
 	struct TestUDPHandler : public Poco::Net::UDPHandler
 	{
-		TestUDPHandler() : counter(0), errCounter(0)
-		{
-			start();
-		}
+		TestUDPHandler() : counter(0), errCounter(0) {}
 
 		void processData(char *buf)
 		{

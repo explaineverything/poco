@@ -27,7 +27,6 @@ public:
 	virtual ~MongoDBTest();
 
 	void testInsertRequest();
-	void testArray();
 	void testQueryRequest();
 	void testDBQueryRequest();
 	void testCountCommand();

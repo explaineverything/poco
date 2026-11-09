@@ -18,7 +18,6 @@
 #include "Poco/Net/ServerSocket.h"
 #include "Poco/Thread.h"
 #include "Poco/Event.h"
-#include <atomic>
 
 
 class EchoServer: public Poco::Runnable
@@ -37,22 +36,15 @@ public:
 	Poco::UInt16 port() const;
 		/// Returns the port the echo server is
 		/// listening on.
-
+		
 	void run();
 		/// Does the work.
-
-	void stop();
-		/// Sets the stop flag.
-
-	bool done();
-		/// Retruns true if if server is done.
-
+		
 private:
 	Poco::Net::ServerSocket _socket;
 	Poco::Thread _thread;
 	Poco::Event  _ready;
-	std::atomic<bool> _stop;
-	std::atomic<bool> _done;
+	bool         _stop;
 };
 
 

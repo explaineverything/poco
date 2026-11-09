@@ -50,6 +50,13 @@ namespace
 			return RSA_PKCS1_PADDING;
 		case RSA_PADDING_PKCS1_OAEP:
 			return RSA_PKCS1_OAEP_PADDING;
+		case RSA_PADDING_SSLV23:
+		//Changed for port OpenSSL -> BoringSSL
+			#if defined(OPENSSL_IS_BORINGSSL)
+				throw NotImplementedException();
+			#else 
+				return RSA_SSLV23_PADDING;
+			#endif			
 		case RSA_PADDING_NONE:
 			return RSA_NO_PADDING;
 		default:
@@ -114,6 +121,7 @@ namespace
 		switch (_paddingMode)
 		{
 		case RSA_PADDING_PKCS1:
+		case RSA_PADDING_SSLV23:
 			size -= 11;
 			break;
 		case RSA_PADDING_PKCS1_OAEP:

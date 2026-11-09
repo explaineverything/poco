@@ -40,8 +40,6 @@ public:
 	void testSplitElements();
 	void testSplitParameters();
 	void testFieldLimit();
-	void testNameLengthLimit();
-	void testValueLengthLimit();
 	void testDecodeWord();
 
 	void setUp();

@@ -25,7 +25,6 @@
 #include "Poco/Data/ODBC/Handle.h"
 #include "Poco/Data/ODBC/ODBCException.h"
 #include "Poco/Data/AbstractSessionImpl.h"
-#include "Poco/TextEncoding.h"
 #include "Poco/SharedPtr.h"
 #include "Poco/Mutex.h"
 #ifdef POCO_OS_FAMILY_WINDOWS
@@ -54,15 +53,15 @@ public:
 
 	SessionImpl(const std::string& connect,
 		std::size_t loginTimeout,
-		std::size_t maxFieldSize = ODBC_MAX_FIELD_SIZE,
+		std::size_t maxFieldSize = ODBC_MAX_FIELD_SIZE, 
 		bool autoBind = true,
 		bool autoExtract = true);
 		/// Creates the SessionImpl. Opens a connection to the database.
 		/// Throws NotConnectedException if connection was not succesful.
 
 	//@ deprecated
-	SessionImpl(const std::string& connect,
-		Poco::Any maxFieldSize = ODBC_MAX_FIELD_SIZE,
+	SessionImpl(const std::string& connect, 
+		Poco::Any maxFieldSize = ODBC_MAX_FIELD_SIZE, 
 		bool enforceCapability=false,
 		bool autoBind = true,
 		bool autoExtract = true);
@@ -144,7 +143,7 @@ public:
 
 	void setMaxFieldSize(const std::string& rName, const Poco::Any& rValue);
 		/// Sets the max field size (the default used when column size is unknown).
-
+		
 	Poco::Any getMaxFieldSize(const std::string& rName="") const;
 		/// Returns the max field size (the default used when column size is unknown).
 
@@ -154,24 +153,14 @@ public:
 	void setQueryTimeout(const std::string&, const Poco::Any& value);
 		/// Sets the timeout (in seconds) for queries.
 		/// Value must be of type int.
-
+		
 	Poco::Any getQueryTimeout(const std::string&) const;
 		/// Returns the timeout (in seconds) for queries,
 		/// or -1 if no timeout has been set.
-
+		
 	int queryTimeout() const;
 		/// Returns the timeout (in seconds) for queries,
 		/// or -1 if no timeout has been set.
-
-	void setDBEncoding(const std::string&, const Poco::Any& value);
-		/// Sets the database encoding.
-		/// Value must be of type std::string.
-
-	Poco::Any getDBEncoding(const std::string&) const;
-		/// Returns the database encoding.
-
-	const std::string& dbEncoding() const;
-		/// Returns the database encoding.
 
 	const ConnectionHandle& dbc() const;
 		/// Returns the connection handle.
@@ -204,7 +193,6 @@ private:
 	mutable char           _canTransact;
 	bool                   _inTransaction;
 	int                    _queryTimeout;
-	std::string            _dbEncoding;
 	Poco::FastMutex        _mutex;
 };
 
@@ -230,7 +218,7 @@ inline void SessionImpl::setMaxFieldSize(const std::string& rName, const Poco::A
 	_maxFieldSize = rValue;
 }
 
-
+		
 inline Poco::Any SessionImpl::getMaxFieldSize(const std::string& rName) const
 {
 	return _maxFieldSize;
@@ -242,7 +230,7 @@ inline void SessionImpl::setDataTypeInfo(const std::string& rName, const Poco::A
 	throw InvalidAccessException();
 }
 
-
+		
 inline Poco::Any SessionImpl::dataTypeInfo(const std::string& rName) const
 {
 	return &_dataTypes;
@@ -300,18 +288,6 @@ inline Poco::Any SessionImpl::getQueryTimeout(const std::string&) const
 inline int SessionImpl::queryTimeout() const
 {
 	return _queryTimeout;
-}
-
-
-inline Poco::Any SessionImpl::getDBEncoding(const std::string&) const
-{
-	return _dbEncoding;
-}
-
-
-inline const std::string& SessionImpl::dbEncoding() const
-{
-	return _dbEncoding;
 }
 
 

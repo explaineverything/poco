@@ -33,6 +33,7 @@
 #if !defined(POCO_NO_LOCALE)
 	#include <locale>
 #endif
+
 #if defined(POCO_NOINTMAX)
 typedef Poco::UInt64 uintmax_t;
 typedef Poco::Int64 intmax_t;
@@ -44,6 +45,7 @@ typedef Poco::Int64 intmax_t;
 #pragma warning(push)
 #pragma warning(disable : 4146)
 #endif // POCO_COMPILER_MSVC
+
 
 // binary numbers are supported, thus 64 (bits) + 1 (string terminating zero)
 #define POCO_MAX_INT_STRING_LEN 65
@@ -110,46 +112,6 @@ inline bool isIntOverflow(From val)
 }
 
 
-template<typename R, typename F, typename S>
-bool safeMultiply(R& result, F f, S s)
-{
-	if ((f == 0) || (s==0))
-	{
-		result = 0;
-		return true;
-	}
-
-	if (f > 0)
-	{
-		if (s > 0)
-		{
-			if (f > (std::numeric_limits<R>::max() / s))
-				return false;
-		}
-		else
-		{
-			if (s < (std::numeric_limits<R>::min() / f))
-				return false;
-		}
-	}
-	else
-	{
-		if (s > 0)
-		{
-			if (f < (std::numeric_limits<R>::min() / s))
-				return false;
-		}
-		else
-		{
-			if (s < (std::numeric_limits<R>::max() / f))
-				return false;
-		}
-	}
-	result = f * s;
-	return true;
-}
-
-
 template <typename F, typename T>
 inline T& isSafeIntCast(F from)
 	/// Returns true if it is safe to cast
@@ -162,7 +124,7 @@ inline T& isSafeIntCast(F from)
 
 template <typename F, typename T>
 inline T& safeIntCast(F from, T& to)
-	/// Returns cast value if it is safe
+	/// Returns csted value if it is safe
 	/// to cast integer from F to T,
 	/// otherwise throws BadCastException.
 {
@@ -226,54 +188,101 @@ bool strToInt(const char* pStr, I& outResult, short base, char thSep = ',')
 	}
 	else if (*pStr == '+') ++pStr;
 
-	// numbers are parsed as unsigned, for negative numbers the sign is applied after parsing
-	// overflow is checked in every parse step
+	// all numbers are parsed as positive; the sign
+	// for negative numbers is adjusted after parsing
 	uintmax_t limitCheck = std::numeric_limits<I>::max();
-	if (negative) ++limitCheck;
+	if (negative)
+	{
+		poco_assert_dbg(std::numeric_limits<I>::is_signed);
+		// to cover the entire range, (-min > max) has to be
+		// taken into account;
+		// to avoid overflow for the largest int size,
+		// we resort to FPEnvironment::copySign() (ie. floating-point)
+		if (sizeof(I) == sizeof(intmax_t))
+			limitCheck = static_cast<uintmax_t>(FPEnvironment::copySign(static_cast<double>(std::numeric_limits<I>::min()), 1));
+		else
+		{
+			intmax_t i = std::numeric_limits<I>::min();
+			limitCheck = -i;
+		}
+	}
+
 	uintmax_t result = 0;
-	unsigned char add = 0;
 	for (; *pStr != '\0'; ++pStr)
 	{
-		if (*pStr == thSep)
-		{
-			if (base == 10) continue;
-			throw Poco::SyntaxException("strToInt: thousand separators only allowed for base 10");
-		}
-		if (result > (limitCheck / base)) return false;
-		if (!safeMultiply(result, result, base)) return false;
+		if  (result > (limitCheck / base)) return false;
 		switch (*pStr)
 		{
 		case '0': case '1': case '2': case '3':
 		case '4': case '5': case '6': case '7':
-			add = (*pStr - '0');
+			{
+				char add = (*pStr - '0');
+				if ((limitCheck - result) < add) return false;
+				result = result * base + add;
+			}
 			break;
 
 		case '8': case '9':
-			if ((base == 10) || (base == 0x10)) add = (*pStr - '0');
+			if ((base == 10) || (base == 0x10))
+			{
+				char  add = (*pStr - '0');
+				if ((limitCheck - result) < add) return false;
+				result = result * base + add;
+			}
 			else return false;
+
 			break;
 
 		case 'a': case 'b': case 'c': case 'd': case 'e': case 'f':
-			if (base != 0x10) return false;
-			add = (*pStr - 'a') + 10;
+			{
+				if (base != 0x10) return false;
+				char  add = (*pStr - 'a');
+				if ((limitCheck - result) < add) return false;
+				result = result * base + (10 + add);
+			}
 			break;
 
 		case 'A': case 'B': case 'C': case 'D': case 'E': case 'F':
-			if (base != 0x10) return false;
-			add = (*pStr - 'A') + 10;
+			{
+				if (base != 0x10) return false;
+				char add = (*pStr - 'A');
+				if ((limitCheck - result) < add) return false;
+				result = result * base + (10 + add);
+			}
 			break;
+
+		case '.':
+			if ((base == 10) && (thSep == '.')) break;
+			else return false;
+
+		case ',':
+			if ((base == 10) && (thSep == ',')) break;
+			else return false;
+
+		case ' ':
+			if ((base == 10) && (thSep == ' ')) break;
 
 		default:
 			return false;
 		}
-		if ((limitCheck - static_cast<uintmax_t>(result)) < add) return false;
-		result += add;
 	}
 
 	if (negative && (base == 10))
-		outResult = static_cast<I>(-result);
+	{
+		poco_assert_dbg(std::numeric_limits<I>::is_signed);
+		intmax_t i;
+		if (sizeof(I) == sizeof(intmax_t))
+			i = static_cast<intmax_t>(FPEnvironment::copySign(static_cast<double>(result), -1));
+		else
+			i = static_cast<intmax_t>(-result);
+		if (isIntOverflow<I>(i)) return false;
+		outResult = static_cast<I>(i);
+	}
 	else
+	{
+		if (isIntOverflow<I>(result)) return false;
 		outResult = static_cast<I>(result);
+	}
 
 	return true;
 }

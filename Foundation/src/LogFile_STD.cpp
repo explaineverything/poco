@@ -20,12 +20,11 @@
 namespace Poco {
 
 
-LogFileImpl::LogFileImpl(const std::string& path):
+LogFileImpl::LogFileImpl(const std::string& path): 
 	_path(path),
-	_str(_path, std::ios::app),
-	_size(static_cast<UInt64>(_str.tellp()))
+	_str(_path, std::ios::app)
 {
-	if (_size == 0)
+	if (sizeImpl() == 0)
 		_creationDate = File(path).getLastModified();
 	else
 		_creationDate = File(path).created();
@@ -39,25 +38,18 @@ LogFileImpl::~LogFileImpl()
 
 void LogFileImpl::writeImpl(const std::string& text, bool flush)
 {
-	std::streampos pos = _str.tellp();
 	_str << text;
 	if (flush)
 		_str << std::endl;
 	else
 		_str << "\n";
-	if (!_str.good())
-	{
-		_str.clear();
-		_str.seekp(pos);
-		throw WriteFileException(_path);
-	}
-	_size = static_cast<UInt64>(_str.tellp());
+	if (!_str.good()) throw WriteFileException(_path);
 }
 
 
 UInt64 LogFileImpl::sizeImpl() const
 {
-	return _size;
+	return (UInt64) _str.tellp();
 }
 
 

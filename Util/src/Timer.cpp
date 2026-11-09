@@ -135,7 +135,7 @@ public:
 		{
 			try
 			{
-				_pTask->updateLastExecution();
+				_pTask->_lastExecution.update();
 				_pTask->run();
 			}
 			catch (Exception& exc)

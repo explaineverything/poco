@@ -31,8 +31,6 @@ using Poco::StreamChannel;
 using Poco::Formatter;
 using Poco::Message;
 using Poco::AutoPtr;
-using Poco::Thread;
-using Poco::Runnable;
 
 
 class SimpleFormatter: public Formatter
@@ -44,32 +42,6 @@ public:
 		text.append(": ");
 		text.append(msg.getText());
 	}
-};
-
-
-class LogRunnable : public Runnable
-{
-public:
-	LogRunnable(AutoPtr<AsyncChannel> pAsync):
-		_pAsync(pAsync),
-		_stop(false)
-	{
-	}
-
-	void run()
-	{
-		Message msg;
-		while (!_stop) _pAsync->log(msg);
-	}
-
-	void stop()
-	{
-		_stop = true;
-	}
-
-private:
-	AutoPtr<AsyncChannel> _pAsync;
-	std::atomic<bool> _stop;
 };
 
 
@@ -99,17 +71,12 @@ void ChannelTest::testAsync()
 {
 	AutoPtr<TestChannel> pChannel = new TestChannel;
 	AutoPtr<AsyncChannel> pAsync = new AsyncChannel(pChannel);
-	LogRunnable lr(pAsync);
 	pAsync->open();
-	Thread t;
-	t.start(lr);
 	Message msg;
 	pAsync->log(msg);
 	pAsync->log(msg);
 	pAsync->close();
-	lr.stop();
-	t.join();
-	assertTrue (pChannel->list().size() >= 2);
+	assertTrue (pChannel->list().size() == 2);
 }
 
 

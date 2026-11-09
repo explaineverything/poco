@@ -211,12 +211,6 @@ void Binder::bind(std::size_t pos, const Time& val, Direction dir)
 }
 
 
-void Binder::bind(std::size_t pos, const UUID& val, Direction dir)
-{
-	bind(pos, toString(val), dir);
-}
-
-
 void Binder::bind(std::size_t pos, const NullData&, Direction dir)
 {
 	poco_assert(dir == PD_IN);

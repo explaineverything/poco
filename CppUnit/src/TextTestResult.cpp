@@ -126,7 +126,6 @@ void TextTestResult::addError(Test* test, CppUnitException* e)
 	else
 	{
 		_ostr << "ERROR (ignored)" << std::flush;
-		delete e;
 	}
 }
 
@@ -141,7 +140,6 @@ void TextTestResult::addFailure(Test* test, CppUnitException* e)
 	else
 	{
 		_ostr << "FAILURE (ignored)" << std::flush;
-		delete e;
 	}
 }
 

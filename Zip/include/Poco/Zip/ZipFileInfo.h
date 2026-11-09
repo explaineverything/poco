@@ -22,6 +22,7 @@
 #include "Poco/Zip/ZipCommon.h"
 #include "Poco/Zip/ZipUtil.h"
 
+
 namespace Poco {
 namespace Zip {
 
@@ -120,7 +121,7 @@ private:
 	void setFileNameLength(Poco::UInt16 size);
 
 	void setFileName(const std::string& str);
-
+	
 	void setExternalFileAttributes(Poco::UInt32 attrs);
 
 	void parse(std::istream& in, bool assumeHeaderRead);
@@ -142,7 +143,7 @@ private:
 	Poco::UInt16 getFileCommentLength() const;
 
 	Poco::UInt32 getExternalFileAttributes() const;
-
+	
 	void setUnixAttributes();
 
 private:
@@ -193,8 +194,8 @@ private:
 		EXTRA_DATA_OFFSET_SIZE = 8,
 		FULLEXTRA_DATA_SIZE = 28
 	};
-
-	enum
+	
+	enum 
 	{
 		DEFAULT_UNIX_FILE_MODE = 0640,
 		DEFAULT_UNIX_DIR_MODE  = 0755
@@ -454,7 +455,7 @@ inline void ZipFileInfo::setCompressionLevel(ZipCommon::CompressionLevel cl)
 {
 	// bit 1 and 2 indicate the level
 	Poco::UInt16 val = static_cast<Poco::UInt16>(cl);
-	val <<= 1;
+	val <<= 1; 
 	Poco::UInt16 mask = 0xfff9;
 	_rawInfo[GENERAL_PURPOSE_POS] = ((_rawInfo[GENERAL_PURPOSE_POS] & mask) | val);
 }

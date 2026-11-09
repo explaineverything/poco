@@ -39,13 +39,6 @@ class Net_API SocketImpl: public Poco::RefCountedObject
 	/// You should not create any instances of this class.
 {
 public:
-	enum Type
-	{
-		SOCKET_TYPE_STREAM = SOCK_STREAM,
-		SOCKET_TYPE_DATAGRAM = SOCK_DGRAM,
-		SOCKET_TYPE_RAW = SOCK_RAW
-	};
-
 	enum SelectMode
 	{
 		SELECT_READ  = 1,
@@ -92,7 +85,7 @@ public:
 		/// If reuseAddress is true, sets the SO_REUSEADDR
 		/// socket option.
 
-	virtual void bind(const SocketAddress& address, bool reuseAddress, bool reusePort);
+	virtual void bind(const SocketAddress& address, bool reuseAddress, bool reusePort );
 		/// Bind a local address to the socket.
 		///
 		/// This is usually only done when establishing a server
@@ -122,7 +115,7 @@ public:
 		/// If the library has not been built with IPv6 support,
 		/// a Poco::NotImplementedException will be thrown.
 
-	virtual void bind6(const SocketAddress& address, bool reuseAddress, bool reusePort, bool ipV6Only);
+	virtual void bind6(const SocketAddress& address, bool reuseAddress, bool reusePort,  bool ipV6Only);
 		/// Bind a local IPv6 address to the socket.
 		///
 		/// This is usually only done when establishing a server
@@ -277,12 +270,6 @@ public:
 		///
 		/// Returns true if the next operation corresponding to
 		/// mode will not block, false otherwise.
-
-	Type type();
-		/// Returns the socket type.
-
-	virtual int getError();
-		/// Returns the socket error.
 
 	virtual void setSendBufferSize(int size);
 		/// Sets the size of the send buffer.
@@ -539,17 +526,6 @@ private:
 //
 // inlines
 //
-inline SocketImpl::Type SocketImpl::type()
-{
-	int type;
-	getOption(SOL_SOCKET, SO_TYPE, type);
-	poco_assert_dbg(type == SOCK_STREAM ||
-					type == SOCK_DGRAM ||
-					type == SOCK_RAW);
-	return static_cast<Type>(type);
-}
-
-
 inline poco_socket_t SocketImpl::sockfd() const
 {
 	return _sockfd;

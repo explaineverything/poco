@@ -31,7 +31,6 @@ public:
 	void testCacheSizeN();
 	void testDuplicateAdd();
 	void testUpdate();
-	void testForEach();
 
 	void setUp();
 	void tearDown();

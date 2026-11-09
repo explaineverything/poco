@@ -24,7 +24,8 @@ namespace Poco {
 namespace Net {
 
 
-HTTPSessionInstantiator::HTTPSessionInstantiator()
+HTTPSessionInstantiator::HTTPSessionInstantiator():
+	_proxyPort(0)
 {
 }
 
@@ -38,9 +39,10 @@ HTTPClientSession* HTTPSessionInstantiator::createClientSession(const Poco::URI&
 {
 	poco_assert (uri.getScheme() == "http");
 	HTTPClientSession* pSession = new HTTPClientSession(uri.getHost(), uri.getPort());
-	if (!getProxyConfig().host.empty())
+	if (!proxyHost().empty())
 	{
-		pSession->setProxyConfig(getProxyConfig());
+		pSession->setProxy(proxyHost(), proxyPort());
+		pSession->setProxyCredentials(proxyUsername(), proxyPassword());
 	}
 	return pSession;
 }
@@ -58,11 +60,18 @@ void HTTPSessionInstantiator::unregisterInstantiator()
 }
 
 
-void HTTPSessionInstantiator::setProxyConfig(const HTTPClientSession::ProxyConfig& proxyConfig)
+void HTTPSessionInstantiator::setProxy(const std::string& host, Poco::UInt16 port)
 {
-	_proxyConfig = proxyConfig;
+	_proxyHost = host;
+	_proxyPort = port;
 }
 
+
+void HTTPSessionInstantiator::setProxyCredentials(const std::string& username, const std::string& password)
+{
+	_proxyUsername = username;
+	_proxyPassword = password;
+}
 
 
 } } // namespace Poco::Net

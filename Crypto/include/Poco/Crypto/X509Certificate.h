@@ -20,7 +20,6 @@
 
 #include "Poco/Crypto/Crypto.h"
 #include "Poco/Crypto/OpenSSLInitializer.h"
-#include "Poco/DigestEngine.h"
 #include "Poco/DateTime.h"
 #include "Poco/SharedPtr.h"
 #include <vector>
@@ -84,7 +83,7 @@ public:
 	X509Certificate& operator = (X509Certificate&& cert) noexcept;
 		/// Move assignment.
 
-	void swap(X509Certificate& cert) noexcept;
+	void swap(X509Certificate& cert);
 		/// Exchanges the certificate with another one.
 
 	~X509Certificate();
@@ -126,11 +125,6 @@ public:
 
 	Poco::DateTime expiresOn() const;
 		/// Returns the date and time the certificate expires.
-
-	Poco::DigestEngine::Digest fingerprint(const std::string& algorithm = "SHA1") const;
-		/// Computes and returns the fingerprint of the certificate,
-		/// using the given algorithm. The algorithm must be supported
-		/// by OpenSSL, e.g., "SHA1" or "SHA256".
 
 	void save(std::ostream& stream) const;
 		/// Writes the certificate to the given stream.

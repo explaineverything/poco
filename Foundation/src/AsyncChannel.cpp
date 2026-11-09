@@ -51,8 +51,7 @@ private:
 
 AsyncChannel::AsyncChannel(Channel::Ptr pChannel, Thread::Priority prio):
 	_pChannel(pChannel),
-	_thread("AsyncChannel"),
-	_closed(false)
+	_thread("AsyncChannel")
 {
 	_thread.setPriority(prio);
 }
@@ -95,25 +94,21 @@ void AsyncChannel::open()
 
 void AsyncChannel::close()
 {
-	if (!_closed.exchange(true))
+	if (_thread.isRunning())
 	{
-		if (_thread.isRunning())
-		{
-			while (!_queue.empty()) Thread::sleep(100);
+		while (!_queue.empty()) Thread::sleep(100);
 
-			do
-			{
-				_queue.wakeUpAll();
-			}
-			while (!_thread.tryJoin(100));
+		do
+		{
+			_queue.wakeUpAll();
 		}
+		while (!_thread.tryJoin(100));
 	}
 }
 
 
 void AsyncChannel::log(const Message& msg)
 {
-	if (_closed) return;
 	if (_queueSize != 0 && _queue.size() >= _queueSize)
 	{
 		++_dropCount;

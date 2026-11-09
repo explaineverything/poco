@@ -24,11 +24,9 @@
 #include "Poco/Data/LOB.h"
 #include "Poco/DateTime.h"
 #include "Poco/Nullable.h"
-#include "Poco/UUID.h"
 #include "Poco/Any.h"
 #include "Poco/Dynamic/Var.h"
 #include "Poco/UTFString.h"
-#include "Poco/TextEncoding.h"
 #include <vector>
 #include <deque>
 #include <list>
@@ -40,7 +38,7 @@ namespace Data {
 
 
 using NullData = NullType;
-class Transcoder;
+
 
 namespace Keywords {
 
@@ -65,8 +63,7 @@ public:
 		PD_IN_OUT
 	};
 
-	AbstractBinder(Poco::TextEncoding::Ptr pFromEncoding = nullptr,
-		Poco::TextEncoding::Ptr pDBEncoding = nullptr);
+	AbstractBinder();
 		/// Creates the AbstractBinder.
 
 	virtual ~AbstractBinder();
@@ -320,18 +317,6 @@ public:
 	virtual void bind(std::size_t pos, const std::list<Time>& val, Direction dir = PD_IN);
 		/// Binds a Time list.
 
-	virtual void bind(std::size_t pos, const UUID& val, Direction dir = PD_IN) = 0;
-		/// Binds a UUID.
-
-	virtual void bind(std::size_t pos, const std::vector<UUID>& val, Direction dir = PD_IN);
-		/// Binds a UUID vector.
-
-	virtual void bind(std::size_t pos, const std::deque<UUID>& val, Direction dir = PD_IN);
-		/// Binds a UUID deque.
-
-	virtual void bind(std::size_t pos, const std::list<UUID>& val, Direction dir = PD_IN);
-		/// Binds a UUID list.
-
 	virtual void bind(std::size_t pos, const NullData& val, Direction dir = PD_IN) = 0;
 		/// Binds a null.
 
@@ -358,19 +343,6 @@ public:
 
 	static bool isInBound(Direction dir);
 		/// Returns true if direction is in bound;
-
-protected:
-	bool transcodeRequired() const;
-	void transcode(const std::string& from, std::string& to);
-	void reverseTranscode(const std::string& from, std::string& to);
-
-	const std::string& toString(const UUID& uuid);
-
-private:
-	using StringList = std::vector<std::string*>;
-  
-	std::unique_ptr<Transcoder> _pTranscoder;
-	std::unique_ptr<StringList> _pStrings;
 };
 
 
@@ -392,12 +364,6 @@ inline bool AbstractBinder::isOutBound(Direction dir)
 inline bool AbstractBinder::isInBound(Direction dir)
 {
 	return PD_IN == dir || PD_IN_OUT == dir;
-}
-
-
-inline bool AbstractBinder::transcodeRequired() const
-{
-	return _pTranscoder.operator bool();
 }
 
 

@@ -108,7 +108,7 @@ public:
 	}
 
 private:
-	std::atomic<bool> _finished;
+	bool _finished;
 };
 
 
@@ -140,8 +140,8 @@ public:
 	}
 
 private:
-	std::atomic<int> _counter;
-	std::atomic<bool> _sleepy;
+	int _counter;
+	bool _sleepy;
 };
 
 

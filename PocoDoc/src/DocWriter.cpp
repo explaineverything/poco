@@ -135,7 +135,7 @@ void DocWriter::writeNavigation()
 	std::string path(pathFor("navigation.html"));
 	std::ofstream ostr(path.c_str());
 	if (!ostr.good()) throw Poco::CreateFileException(path);
-	writeHeader(ostr, tr("Navigation"), "js/iframeResizer.contentWindow.min.js", NO_CUSTOM_HTML);
+	writeHeader(ostr, tr("Navigation"), "js/iframeResizer.contentWindow.min.js");
 	beginBody(ostr);
 	ostr << "<h3 class=\"overview\"><a href=\"index.html\" target=\"_top\">" << htmlize(software) << "</a></h3>\n";
 
@@ -208,7 +208,7 @@ void DocWriter::writeNavigation()
 	ostr << "<div>&nbsp;</div>\n"; // workaround to avoid cutting off a few pixels from last line
 	endBody(ostr);
 	ostr << "<script>CollapsibleLists.apply(true)</script>" << std::endl;
-	writeFooter(ostr, NO_TRACKING | NO_CUSTOM_HTML);
+	writeFooter(ostr);
 }
 
 
@@ -627,7 +627,7 @@ std::string DocWriter::makeFileName(const std::string& str)
 }
 
 
-void DocWriter::writeHeader(std::ostream& ostr, const std::string& title, const std::string& extraScript, int options)
+void DocWriter::writeHeader(std::ostream& ostr, const std::string& title, const std::string& extraScript)
 {
 	Application& app = Application::instance();
 	std::string company(app.config().getString("PocoDoc.company", "Applied Informatics"));
@@ -651,10 +651,6 @@ void DocWriter::writeHeader(std::ostream& ostr, const std::string& title, const 
 		ostr << "<script type=\"text/javascript\" src=\"" << extraScript << "\"></script>" << std::endl;
 	}
 	ostr << "<script type=\"text/javascript\" src=\"js/CollapsibleLists.compressed.js\"></script>" << std::endl;
-	if ((options & NO_CUSTOM_HTML) == 0)
-	{
-		ostr << app.config().getString("PocoDoc.customHeadHTML", "");
-	}
 	ostr << "</head>" << std::endl;
 	ostr << "<body";
 	if (_prettifyCode)
@@ -663,20 +659,11 @@ void DocWriter::writeHeader(std::ostream& ostr, const std::string& title, const 
 }
 
 
-void DocWriter::writeFooter(std::ostream& ostr, int options)
+void DocWriter::writeFooter(std::ostream& ostr)
 {
 	Application& app = Application::instance();
-	if ((options & NO_TRACKING) == 0)
-	{
-		std::string googleAnalyticsCode(app.config().getString("PocoDoc.googleAnalyticsCode", ""));
-		ostr << googleAnalyticsCode;
-		std::string hubSpotCode(app.config().getString("PocoDoc.hubSpotCode", ""));
-		ostr << hubSpotCode;
-	}
-	if ((options & NO_CUSTOM_HTML) == 0)
-	{
-		ostr << app.config().getString("PocoDoc.customBodyHTML", "");
-	}
+	std::string googleAnalyticsCode(app.config().getString("PocoDoc.googleAnalyticsCode", ""));
+	ostr << googleAnalyticsCode;
 	ostr << "</body>" << std::endl;
 	ostr << "</html>" << std::endl;
 }
@@ -687,8 +674,8 @@ void DocWriter::writeCopyright(std::ostream& ostr)
 	Application& app = Application::instance();
 	std::string software(app.config().getString("PocoDoc.software", ""));
 	std::string version(app.config().getString("PocoDoc.version", ""));
-	std::string company(app.config().getString("PocoDoc.company", "Applied Informatics Software Engineering GmbH"));
-	std::string companyURI(app.config().getString("PocoDoc.companyURI", "https://macchina.io/"));
+	std::string company(app.config().getString("PocoDoc.company", "Applied Informatics"));
+	std::string companyURI(app.config().getString("PocoDoc.companyURI", "http://www.appinf.com/"));
 	std::string licenseURI(app.config().getString("PocoDoc.licenseURI", ""));
 	DateTime now;
 	ostr << "<p class=\"footer\">";
@@ -808,7 +795,7 @@ void DocWriter::writeNavigationFrame(std::ostream& ostr, const std::string& grou
 		query += item;
 	}
 	ostr << "<div id=\"navigation\">\n";
-	ostr << "<iframe sandbox=\"allow-scripts allow-top-navigation-by-user-activation allow-same-origin\" src=\"navigation.html" << query << "\" onload=\"iFrameResize(this);\" scrolling=\"no\"></iframe>\n";
+	ostr << "<iframe src=\"navigation.html" << query << "\" onload=\"iFrameResize(this);\" scrolling=\"no\"></iframe>\n";
 	ostr << "</div>\n";
 }
 
@@ -1299,7 +1286,7 @@ bool DocWriter::writeSpecial(std::ostream& ostr, std::string& token, std::string
 	{
 		_htmlMode = false;
 	}
-	else if (token == "<?" || token == "<?=")
+	else if (token == "<?")
 	{
 		std::string prop;
 		nextToken(begin, end, token);
@@ -1311,19 +1298,6 @@ bool DocWriter::writeSpecial(std::ostream& ostr, std::string& token, std::string
 		Poco::trimInPlace(prop);
 		Application& app = Application::instance();
 		ostr << htmlize(app.config().getString(prop, std::string("NOT FOUND: ") + prop));
-	}
-	else if (token == "<?-")
-	{
-		std::string prop;
-		nextToken(begin, end, token);
-		while (!token.empty() && token != "?>")
-		{
-			prop.append(token);
-			nextToken(begin, end, token);
-		}
-		Poco::trimInPlace(prop);
-		Application& app = Application::instance();
-		ostr << app.config().getString(prop, "");
 	}
 	else if (_htmlMode)
 	{
@@ -1400,10 +1374,7 @@ void DocWriter::nextToken(std::string::const_iterator& it, const std::string::co
 	{
 		token += *it++;
 		if (it != end && std::ispunct(*it)) token += *it++;
-		if (token != "<[" && token != "<*" && token != "<!")
-		{
-			if (it != end && std::ispunct(*it)) token += *it++;
-		}
+		if (it != end && std::ispunct(*it)) token += *it++;
 	}
 	else if (it != end && *it == '[')
 	{

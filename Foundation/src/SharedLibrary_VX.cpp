@@ -99,7 +99,6 @@ void SharedLibraryImpl::unloadImpl()
 
 bool SharedLibraryImpl::isLoadedImpl() const
 {
-	FastMutex::ScopedLock lock(_mutex);
 	return _moduleId != 0;
 }
 

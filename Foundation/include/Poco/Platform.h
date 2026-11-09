@@ -61,7 +61,7 @@
 #elif defined(__NACL__)
 	#define POCO_OS_FAMILY_UNIX 1
 	#define POCO_OS POCO_OS_NACL
-#elif defined(linux) || defined(__linux) || defined(__linux__) || defined(__TOS_LINUX__) || defined(EMSCRIPTEN)
+#elif defined(linux) || defined(__linux) || defined(__linux__) || defined(__TOS_LINUX__) || defined(EMSCRIPTEN) || defined(__EMSCRIPTEN__)
 	#define POCO_OS_FAMILY_UNIX 1
 	#if defined(__ANDROID__)
 		#define POCO_OS POCO_OS_ANDROID
@@ -118,31 +118,29 @@
 //
 // Hardware Architecture and Byte Order
 //
-#define POCO_ARCH_ALPHA       0x01
-#define POCO_ARCH_IA32        0x02
-#define POCO_ARCH_IA64        0x03
-#define POCO_ARCH_MIPS        0x04
-#define POCO_ARCH_HPPA        0x05
-#define POCO_ARCH_PPC         0x06
-#define POCO_ARCH_POWER       0x07
-#define POCO_ARCH_SPARC       0x08
-#define POCO_ARCH_AMD64       0x09
-#define POCO_ARCH_ARM         0x0a
-#define POCO_ARCH_M68K        0x0b
-#define POCO_ARCH_S390        0x0c
-#define POCO_ARCH_SH          0x0d
-#define POCO_ARCH_NIOS2       0x0e
-#define POCO_ARCH_AARCH64     0x0f
-#define POCO_ARCH_ARM64       0x0f // same as POCO_ARCH_AARCH64
-#define POCO_ARCH_RISCV64     0x10
-#define POCO_ARCH_RISCV32     0x11
-#define POCO_ARCH_LOONGARCH64 0x12
+#define POCO_ARCH_ALPHA   0x01
+#define POCO_ARCH_IA32    0x02
+#define POCO_ARCH_IA64    0x03
+#define POCO_ARCH_MIPS    0x04
+#define POCO_ARCH_HPPA    0x05
+#define POCO_ARCH_PPC     0x06
+#define POCO_ARCH_POWER   0x07
+#define POCO_ARCH_SPARC   0x08
+#define POCO_ARCH_AMD64   0x09
+#define POCO_ARCH_ARM     0x0a
+#define POCO_ARCH_M68K    0x0b
+#define POCO_ARCH_S390    0x0c
+#define POCO_ARCH_SH      0x0d
+#define POCO_ARCH_NIOS2   0x0e
+#define POCO_ARCH_AARCH64 0x0f
+#define POCO_ARCH_ARM64   0x0f // same as POCO_ARCH_AARCH64
+#define POCO_ARCH_RISCV64 0x10
 
 
 #if defined(__ALPHA) || defined(__alpha) || defined(__alpha__) || defined(_M_ALPHA)
 	#define POCO_ARCH POCO_ARCH_ALPHA
 	#define POCO_ARCH_LITTLE_ENDIAN 1
-#elif defined(i386) || defined(__i386) || defined(__i386__) || defined(_M_IX86) || defined(EMSCRIPTEN)
+#elif defined(i386) || defined(__i386) || defined(__i386__) || defined(_M_IX86) || defined(EMSCRIPTEN) || defined(__EMSCRIPTEN__)
 	#define POCO_ARCH POCO_ARCH_IA32
 	#define POCO_ARCH_LITTLE_ENDIAN 1
 #elif defined(_IA64) || defined(__IA64__) || defined(__ia64__) || defined(__ia64) || defined(_M_IA64)
@@ -192,7 +190,7 @@
 	#else
 		#define POCO_ARCH_LITTLE_ENDIAN 1
 	#endif
-#elif defined(__arm64__) || defined(__arm64) || defined(_M_ARM64)
+#elif defined(__arm64__) || defined(__arm64)
 	#define POCO_ARCH POCO_ARCH_ARM64
 	#if defined(__ARMEB__)
 		#define POCO_ARCH_BIG_ENDIAN 1
@@ -227,16 +225,8 @@
 #elif defined(__AARCH64EB__)
 	#define POCO_ARCH POCO_ARCH_AARCH64
 	#define POCO_ARCH_BIG_ENDIAN 1
-#elif defined(__riscv)
-	#if (__riscv_xlen == 64)
-		#define POCO_ARCH POCO_ARCH_RISCV64
-		#define POCO_ARCH_LITTLE_ENDIAN 1
-	#elif(__riscv_xlen == 32)
-		#define POCO_ARCH POCO_ARCH_RISCV32
-		#define POCO_ARCH_LITTLE_ENDIAN 1
-	#endif
-#elif defined(__loongarch64)
-	#define POCO_ARCH POCO_ARCH_LOONGARCH64
+#elif defined(__riscv) && (__riscv_xlen == 64)
+	#define POCO_ARCH POCO_ARCH_RISCV64
 	#define POCO_ARCH_LITTLE_ENDIAN 1
 #endif
 
@@ -247,9 +237,6 @@
 	#define POCO_COMPILER_MSVC
 #elif defined (__GNUC__)
 	#define POCO_COMPILER_GCC
-	#if defined (__MINGW32__) || defined (__MINGW64__)
-		#define POCO_COMPILER_MINGW
-	#endif
 #elif defined (__MINGW32__) || defined (__MINGW64__)
 	#define POCO_COMPILER_MINGW
 #elif defined (__INTEL_COMPILER) || defined(__ICC) || defined(__ECC) || defined(__ICL)

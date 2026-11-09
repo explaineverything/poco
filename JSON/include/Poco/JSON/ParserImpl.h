@@ -38,9 +38,11 @@ namespace JSON {
 class JSON_API ParserImpl
 {
 protected:
-	static const std::size_t JSON_DEFAULT_DEPTH = 128;
+	static const std::size_t JSON_PARSE_BUFFER_SIZE = 4096;
+	static const std::size_t JSON_PARSER_STACK_SIZE = 128;
+	static const int         JSON_UNLIMITED_DEPTH = -1;
 
-	ParserImpl(const Handler::Ptr& pHandler = new ParseHandler);
+	ParserImpl(const Handler::Ptr& pHandler = new ParseHandler, std::size_t bufSize = JSON_PARSE_BUFFER_SIZE);
 		/// Creates JSON ParserImpl, using the given Handler and buffer size.
 
 	virtual ~ParserImpl();
@@ -99,13 +101,12 @@ private:
 	void handleObject();
 	void handle();
 	void handle(const std::string& json);
-	void handle(std::istream& json);
 	void stripComments(std::string& json);
 	bool checkError();
 
 	struct json_stream* _pJSON;
 	Handler::Ptr _pHandler;
-	std::size_t  _depth;
+	int          _depth;
 	char         _decimalPoint;
 	bool         _allowNullByte;
 	bool         _allowComments;

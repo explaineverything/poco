@@ -13,7 +13,6 @@
 
 
 #include "Poco/Net/RejectCertificateHandler.h"
-#include "Poco/Net/VerificationErrorArgs.h"
 
 
 namespace Poco {

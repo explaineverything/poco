@@ -52,30 +52,19 @@ public:
 		/// in the form #AnonEnum<n> (where <n> is a unique integer)
 		/// will be assigned.
 
-	Enum(const std::string& name, NameSpace* pNameSpace, const std::string& baseType, int flags = 0);
-		/// Creates the Enum.
-		///
-		/// If name is the empty string, an internal name
-		/// in the form #AnonEnum<n> (where <n> is a unique integer)
-		/// will be assigned.
-
 	~Enum();
 		/// Destroys the Enum.
 
 	void addValue(EnumValue* pValue);
 		/// Adds an enum value. The Enum takes ownership of the value.
-
+		
 	Iterator begin() const;
 		/// Returns an iterator for iterating over the Enum's EnumValue's.
-
+		
 	Iterator end() const;
 		/// Returns an iterator for iterating over the Enum's EnumValue's.
-
-	const std::string& baseType() const;
-		/// Returns the base type or an empty string if no base type has been specified.
-
+	
 	int flags() const;
-		/// Returns the flags.
 
 	Symbol::Kind kind() const;
 	std::string toString() const;
@@ -83,9 +72,8 @@ public:
 protected:
 	static std::string processName(const std::string& name);
 
-private:
+private:	
 	Values _values;
-	std::string _baseType;
 	int _flags;
 	static int _count;
 };
@@ -94,12 +82,6 @@ private:
 //
 // inlines
 //
-inline const std::string& Enum::baseType() const
-{
-	return _baseType;
-}
-
-
 inline int Enum::flags() const
 {
 	return _flags;

@@ -264,7 +264,7 @@ void TimerTest::testFunc()
 {
 	Timer timer;
 
-	std::atomic<int> count(0);
+	int count = 0;
 	timer.schedule(Timer::func([&count]()
 	{
 		count++;

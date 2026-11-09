@@ -40,8 +40,6 @@ HTTPClientSession::ProxyConfig HTTPClientSession::_globalProxyConfig;
 
 HTTPClientSession::HTTPClientSession():
 	_port(HTTPSession::HTTP_PORT),
-	_sourceAddress4(IPAddress::wildcard(IPAddress::IPv4), 0),
-	_sourceAddress6(IPAddress::wildcard(IPAddress::IPv6), 0),
 	_proxyConfig(_globalProxyConfig),
 	_keepAliveTimeout(DEFAULT_KEEP_ALIVE_TIMEOUT, 0),
 	_reconnect(false),
@@ -56,8 +54,6 @@ HTTPClientSession::HTTPClientSession():
 HTTPClientSession::HTTPClientSession(const StreamSocket& socket):
 	HTTPSession(socket),
 	_port(HTTPSession::HTTP_PORT),
-	_sourceAddress4(IPAddress::wildcard(IPAddress::IPv4), 0),
-	_sourceAddress6(IPAddress::wildcard(IPAddress::IPv6), 0),
 	_proxyConfig(_globalProxyConfig),
 	_keepAliveTimeout(DEFAULT_KEEP_ALIVE_TIMEOUT, 0),
 	_reconnect(false),
@@ -72,8 +68,6 @@ HTTPClientSession::HTTPClientSession(const StreamSocket& socket):
 HTTPClientSession::HTTPClientSession(const SocketAddress& address):
 	_host(address.host().toString()),
 	_port(address.port()),
-	_sourceAddress4(IPAddress::wildcard(IPAddress::IPv4), 0),
-	_sourceAddress6(IPAddress::wildcard(IPAddress::IPv6), 0),
 	_proxyConfig(_globalProxyConfig),
 	_keepAliveTimeout(DEFAULT_KEEP_ALIVE_TIMEOUT, 0),
 	_reconnect(false),
@@ -88,8 +82,6 @@ HTTPClientSession::HTTPClientSession(const SocketAddress& address):
 HTTPClientSession::HTTPClientSession(const std::string& host, Poco::UInt16 port):
 	_host(host),
 	_port(port),
-	_sourceAddress4(IPAddress::wildcard(IPAddress::IPv4), 0),
-	_sourceAddress6(IPAddress::wildcard(IPAddress::IPv6), 0),
 	_proxyConfig(_globalProxyConfig),
 	_keepAliveTimeout(DEFAULT_KEEP_ALIVE_TIMEOUT, 0),
 	_reconnect(false),
@@ -115,21 +107,6 @@ HTTPClientSession::HTTPClientSession(const std::string& host, Poco::UInt16 port,
 }
 
 
-HTTPClientSession::HTTPClientSession(const StreamSocket& socket, const ProxyConfig& proxyConfig):
-	HTTPSession(socket),
-	_port(HTTPSession::HTTP_PORT),
-	_sourceAddress4(IPAddress::wildcard(IPAddress::IPv4), 0),
-	_sourceAddress6(IPAddress::wildcard(IPAddress::IPv6), 0),
-	_proxyConfig(proxyConfig),
-	_keepAliveTimeout(DEFAULT_KEEP_ALIVE_TIMEOUT, 0),
-	_reconnect(false),
-	_mustReconnect(false),
-	_expectResponseBody(false),
-	_responseReceived(false)
-{
-}
-
-
 HTTPClientSession::~HTTPClientSession()
 {
 }
@@ -150,39 +127,6 @@ void HTTPClientSession::setPort(Poco::UInt16 port)
 		_port = port;
 	else
 		throw IllegalStateException("Cannot set the port number for an already connected session");
-}
-
-
-void HTTPClientSession::setSourceAddress(const SocketAddress& address)
-{
-	if (!connected())
-	{
-		if (address.family() == IPAddress::IPv4)
-			_sourceAddress4 = address;
-		else
-			_sourceAddress6 = address;
-		_sourceAddress = address;
-	}
-	else
-		throw IllegalStateException("Cannot set the source address for an already connected session");
-}
-
-
-const SocketAddress& HTTPClientSession::getSourceAddress()
-{
-	return _sourceAddress;
-}
-
-
-const SocketAddress& HTTPClientSession::getSourceAddress4()
-{
-	return _sourceAddress4;
-}
-
-
-const SocketAddress& HTTPClientSession::getSourceAddress6()
-{
-	return _sourceAddress6;
 }
 
 
@@ -309,7 +253,7 @@ std::ostream& HTTPClientSession::sendRequestImpl(const HTTPRequest& request)
 	{
 		HTTPHeaderOutputStream hos(*this);
 		request.write(hos);
-		_pRequestStream = new HTTPChunkedOutputStream(*this, &requestTrailer());
+		_pRequestStream = new HTTPChunkedOutputStream(*this);
 	}
 	else if (request.hasContentLength())
 	{
@@ -349,7 +293,6 @@ void HTTPClientSession::flushRequest()
 std::istream& HTTPClientSession::receiveResponse(HTTPResponse& response)
 {
 	flushRequest();
-	responseTrailer().clear();
 	if (!_responseReceived)
 	{
 		do
@@ -377,7 +320,7 @@ std::istream& HTTPClientSession::receiveResponse(HTTPResponse& response)
 	if (!_expectResponseBody || response.getStatus() < 200 || response.getStatus() == HTTPResponse::HTTP_NO_CONTENT || response.getStatus() == HTTPResponse::HTTP_NOT_MODIFIED)
 		_pResponseStream = new HTTPFixedLengthInputStream(*this, 0);
 	else if (response.getChunkedTransferEncoding())
-		_pResponseStream = new HTTPChunkedInputStream(*this, &responseTrailer());
+		_pResponseStream = new HTTPChunkedInputStream(*this);
 	else if (response.hasContentLength())
 #if defined(POCO_HAVE_INT64)
 		_pResponseStream = new HTTPFixedLengthInputStream(*this, response.getContentLength64());
@@ -457,18 +400,16 @@ int HTTPClientSession::write(const char* buffer, std::streamsize length)
 
 void HTTPClientSession::reconnect()
 {
-	SocketAddress addr;
 	if (_proxyConfig.host.empty() || bypassProxy())
-		addr = SocketAddress(_host, _port);
-	else
-		addr = SocketAddress(_proxyConfig.host, _proxyConfig.port);
-
-	if ((!_sourceAddress4.host().isWildcard()) || (_sourceAddress4.port() != 0))
-		connect(addr, _sourceAddress4);
-	else if ((!_sourceAddress6.host().isWildcard()) || (_sourceAddress6.port() != 0))
-		connect(addr, _sourceAddress6);
-	else
+	{
+		SocketAddress addr(_host, _port);
 		connect(addr);
+	}
+	else
+	{
+		SocketAddress addr(_proxyConfig.host, _proxyConfig.port);
+		connect(addr);
+	}
 }
 
 
@@ -523,7 +464,6 @@ void HTTPClientSession::proxyAuthenticateImpl(HTTPRequest& request, const ProxyC
 			_proxyDigestCreds.setPassword(proxyConfig.password);
 			proxyAuthenticateDigest(request);
 		}
-		break;
 
 	case PROXY_AUTH_NTLM:
 		if (_ntlmProxyAuthenticated)
@@ -538,7 +478,6 @@ void HTTPClientSession::proxyAuthenticateImpl(HTTPRequest& request, const ProxyC
 			proxyAuthenticateNTLM(request);
 			_ntlmProxyAuthenticated = true;
 		}
-		break;
 	}
 }
 
@@ -595,8 +534,6 @@ StreamSocket HTTPClientSession::proxyConnect()
 	proxyRequest.set(HTTPRequest::HOST, getHost());
 	proxySession.proxyAuthenticateImpl(proxyRequest, _proxyConfig);
 	proxySession.setKeepAlive(true);
-	proxySession.setSourceAddress(_sourceAddress4);
-	proxySession.setSourceAddress(_sourceAddress6);
 	proxySession.sendRequest(proxyRequest);
 	proxySession.receiveResponse(proxyResponse);
 	if (proxyResponse.getStatus() != HTTPResponse::HTTP_OK)

@@ -19,7 +19,6 @@
 
 
 #include "Poco/Net/Net.h"
-#include "Poco/Net/HTTPClientSession.h"
 #include "Poco/Mutex.h"
 #include "Poco/URI.h"
 #include "Poco/SingletonHolder.h"
@@ -32,6 +31,7 @@ namespace Net {
 
 
 class HTTPSessionInstantiator;
+class HTTPClientSession;
 
 
 class Net_API HTTPSessionFactory
@@ -51,9 +51,6 @@ public:
 
 	HTTPSessionFactory(const std::string& proxyHost, Poco::UInt16 proxyPort);
 		/// Creates the HTTPSessionFactory and sets the proxy host and port.
-
-	HTTPSessionFactory(const HTTPClientSession::ProxyConfig& proxyConfig);
-		/// Creates the HTTPSessionFactory and sets the proxy configuration.
 
 	~HTTPSessionFactory();
 		/// Destroys the HTTPSessionFactory.
@@ -81,27 +78,21 @@ public:
 
 	const std::string& proxyHost() const;
 		/// Returns the proxy host, if one has been set, or an empty string otherwise.
-
+		
 	Poco::UInt16 proxyPort() const;
 		/// Returns the proxy port number, if one has been set, or zero otherwise.
 
 	void setProxy(const std::string& proxyHost, Poco::UInt16 proxyPort);
 		/// Sets the proxy host and port number.
-
+		
 	void setProxyCredentials(const std::string& username, const std::string& password);
 		/// Sets the username and password for proxy authorization (Basic auth only).
 
 	const std::string& proxyUsername() const;
 		/// Returns the username for proxy authorization.
-
+		
 	const std::string& proxyPassword() const;
 		/// Returns the password for proxy authorization.
-
-	void setProxyConfig(const HTTPClientSession::ProxyConfig& proxyConfig);
-		/// Sets the proxy configuration.
-
-	const HTTPClientSession::ProxyConfig& getProxyConfig() const;
-		/// Returns the proxy configuration.
 
 	static HTTPSessionFactory& defaultFactory();
 		/// Returns the default HTTPSessionFactory.
@@ -118,11 +109,14 @@ private:
 
 	HTTPSessionFactory(const HTTPSessionFactory&);
 	HTTPSessionFactory& operator = (const HTTPSessionFactory&);
-
+	
 	typedef std::map<std::string, InstantiatorInfo> Instantiators;
 
 	Instantiators _instantiators;
-	HTTPClientSession::ProxyConfig _proxyConfig;
+	std::string   _proxyHost;
+	Poco::UInt16  _proxyPort;
+	std::string   _proxyUsername;
+	std::string   _proxyPassword;
 
 	mutable Poco::FastMutex _mutex;
 };
@@ -133,31 +127,25 @@ private:
 //
 inline const std::string& HTTPSessionFactory::proxyHost() const
 {
-	return _proxyConfig.host;
+	return _proxyHost;
 }
 
 
 inline Poco::UInt16 HTTPSessionFactory::proxyPort() const
 {
-	return _proxyConfig.port;
+	return _proxyPort;
 }
 
 
 inline const std::string& HTTPSessionFactory::proxyUsername() const
 {
-	return _proxyConfig.username;
+	return _proxyUsername;
 }
 
 
 inline const std::string& HTTPSessionFactory::proxyPassword() const
 {
-	return _proxyConfig.password;
-}
-
-
-inline const HTTPClientSession::ProxyConfig& HTTPSessionFactory::getProxyConfig() const
-{
-	return _proxyConfig;
+	return _proxyPassword;
 }
 
 

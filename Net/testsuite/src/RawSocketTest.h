@@ -26,7 +26,6 @@ public:
 
 	void testEchoIPv4();
 	void testSendToReceiveFromIPv4();
-	void testEchoIPv4Move();
 
 	void setUp();
 	void tearDown();
