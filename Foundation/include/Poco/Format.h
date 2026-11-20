@@ -124,7 +124,7 @@ void format(std::string& result, const std::string& fmt, T arg1, Args... args)
 	values.reserve(sizeof...(Args) + 1);
 	values.emplace_back(arg1);
 	values.insert(values.end(), { args... });
-	format(result, fmt, values);
+	::Poco::format(result, fmt, values); // EE: qualified, avoids ambiguity with std::format (C++20), as upstream poco 1.15.0 (#4966)
 }
 
 
@@ -138,7 +138,7 @@ void format(std::string& result, const char* fmt, T arg1, Args... args)
 	values.reserve(sizeof...(Args) + 1);
 	values.emplace_back(arg1);
 	values.insert(values.end(), { args... });
-	format(result, fmt, values);
+	::Poco::format(result, fmt, values); // EE: qualified, avoids ambiguity with std::format (C++20), as upstream poco 1.15.0 (#4966)
 }
 
 
@@ -153,7 +153,7 @@ std::string format(const std::string& fmt, T arg1, Args... args)
 	values.emplace_back(arg1);
 	values.insert(values.end(), { args... });
 	std::string result;
-	format(result, fmt, values);
+	::Poco::format(result, fmt, values); // EE: qualified, avoids ambiguity with std::format (C++20), as upstream poco 1.15.0 (#4966)
 	return result;
 }
 
@@ -169,7 +169,7 @@ std::string format(const char* fmt, T arg1, Args... args)
 	values.emplace_back(arg1);
 	values.insert(values.end(), { args... });
 	std::string result;
-	format(result, fmt, values);
+	::Poco::format(result, fmt, values); // EE: qualified, avoids ambiguity with std::format (C++20), as upstream poco 1.15.0 (#4966)
 	return result;
 }
 
